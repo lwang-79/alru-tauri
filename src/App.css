@@ -1,0 +1,493 @@
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  /* Disable text selection and dragging */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Prevent all dragging */
+body, html {
+  overflow: hidden;
+  -webkit-app-region: no-drag;
+}
+
+/* Prevent image and element dragging */
+img, a, button, div {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+
+/* Allow text selection in specific areas */
+input,
+textarea,
+code,
+pre,
+.selectable {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+}
+
+.app-header {
+  text-align: center;
+  padding: 1rem;
+  background: #f6f6f6;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  color: #1a1a1a;
+  -webkit-app-region: no-drag;
+}
+
+.app-subtitle {
+  color: #666;
+  margin: 0;
+  -webkit-app-region: no-drag;
+}
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+  background: #f6f6f6;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.step-item:hover:not(.disabled) {
+  border-color: #396cd8;
+}
+
+.step-item.active {
+  border-color: #396cd8;
+  background: #f0f5ff;
+}
+
+.step-item.complete {
+  border-color: #22c55e;
+}
+
+.step-item.complete .step-number {
+  background: #22c55e;
+  color: white;
+}
+
+.step-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #f5f5f5;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e5e5e5;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.step-item.active .step-number {
+  background: #396cd8;
+  color: white;
+}
+
+.step-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Scrollable wrapper - Full width, handles scrolling */
+.scrollable-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  background: #f6f6f6;
+}
+
+/* Step Content - Inner container with max-width and padding */
+.step-content {
+  max-width: 900px;
+  margin: 0 auto 2rem auto ;
+  padding: 2rem;
+  min-height: calc(100vh - 200px); /* Ensure minimum height */
+  background: #fff;
+  /* Force proper layout calculation */
+  contain: layout;
+}
+
+/* Placeholder Steps */
+.placeholder-step {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.placeholder-step h2 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+}
+
+.placeholder-step p {
+  color: #666;
+  margin: 0.5rem 0;
+}
+
+.coming-soon {
+  display: inline-block;
+  margin-top: 1rem !important;
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: #888;
+}
+
+/* Common button styles */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:focus {
+  outline: 2px solid #396cd8;
+  outline-offset: 2px;
+}
+
+a {
+  font-weight: 500;
+  color: #396cd8;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #1a1a1a;
+  }
+
+  .app-container {
+    background: #1a1a1a;
+  }
+
+  .app-header {
+    background: #1a1a1a;
+  }
+
+  .app-header h1 {
+    color: #f6f6f6;
+  }
+
+  .app-subtitle {
+    color: #999;
+  }
+
+  .step-indicator {
+    background: #1a1a1a;
+    border-bottom-color: #333;
+  }
+
+  .step-item {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #f6f6f6;
+  }
+
+  .step-item:hover:not(.disabled) {
+    border-color: #5b8def;
+  }
+
+  .step-item.disabled {
+    opacity: 0.4;
+    background: #1a1a1a;
+  }
+
+  .step-item.active {
+    border-color: #5b8def;
+    background: #2a3a5a;
+  }
+
+  .step-number {
+    background: #444;
+    color: #f6f6f6;
+  }
+
+  .step-item.active .step-number {
+    background: #5b8def;
+  }
+
+  .scrollable-wrapper {
+    background: #1a1a1a;
+  }
+
+  .step-content {
+    background: #2a2a2a;
+  }
+
+  .placeholder-step h2 {
+    color: #f6f6f6;
+  }
+
+  .placeholder-step p {
+    color: #999;
+  }
+
+  .coming-soon {
+    background: #333;
+    color: #888;
+  }
+
+  a {
+    color: #5b8def;
+  }
+}
+
+
+/* Dialog */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dialog h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.dialog p {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.dialog-checkbox {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.dialog-checkbox .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.dialog-checkbox .checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #396cd8;
+}
+
+.dialog-hint {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8rem;
+  color: #666;
+  padding-left: 1.75rem;
+}
+
+.dialog-hint code {
+  background-color: #e9ecef;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.dialog .primary-button,
+.dialog .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 100px;
+}
+
+.dialog .spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.primary-button {
+  background: #396cd8;
+  color: white;
+  border: none;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #2d5bb8;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: #e5e5e5;
+}
+
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dialog {
+    background: #2a2a2a;
+    color: #f6f6f6;
+  }
+
+  .dialog p {
+    color: #999;
+  }
+
+  .dialog-checkbox {
+    background-color: #333;
+  }
+
+  .dialog-checkbox .checkbox-label {
+    color: #eee;
+  }
+
+  .dialog-hint {
+    color: #aaa;
+  }
+
+  .dialog-hint code {
+    background-color: #444;
+    color: #ddd;
+  }
+
+  .secondary-button {
+    background: #333;
+    color: #f6f6f6;
+    border-color: #444;
+  }
+
+  .secondary-button:hover:not(:disabled) {
+    background: #444;
+  }
+}

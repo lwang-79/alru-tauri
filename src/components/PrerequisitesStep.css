@@ -1,0 +1,222 @@
+/* Prerequisites Step Specific Styles */
+
+.tools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tool-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: border-color 0.2s;
+}
+
+.tool-item.installed {
+  border-color: #4caf50;
+  background-color: #f8fff8;
+}
+
+.tool-item.missing {
+  border-color: #f44336;
+  background-color: #fff8f8;
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tool-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.tool-version {
+  color: #666;
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+
+.install-guidance {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #fcc;
+}
+
+.install-guidance p {
+  margin: 0 0 0.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.install-guidance a {
+  color: #396cd8;
+  font-size: 0.9rem;
+}
+
+.error-detail {
+  color: #c00;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+/* Optional Tools Section */
+.optional-tools-section {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.optional-tools-section h3 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+  color: #666;
+}
+
+.optional-description {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0 0 1rem 0;
+}
+
+.optional-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.optional-tool-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.25rem 0.75rem;
+  background-color: #fafafa;
+}
+
+.optional-tool-item.installed {
+  background-color: #f8fff8;
+  border-color: #c8e6c9;
+}
+
+.optional-tool-item.not-installed {
+  background-color: #fafafa;
+  border-color: #e0e0e0;
+}
+
+.optional-tool-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.green {
+  background-color: #4caf50;
+}
+
+.status-dot.gray {
+  background-color: #bdbdbd;
+}
+
+.optional-tool-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.optional-tool-version {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: auto;
+}
+
+.optional-tool-description {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .tool-item {
+    border-color: #444;
+  }
+
+  .tool-item.installed {
+    border-color: #2e7d32;
+    background-color: #1a2a1a;
+  }
+
+  .tool-item.missing {
+    border-color: #c62828;
+    background-color: #2a1a1a;
+  }
+
+  .tool-version {
+    color: #aaa;
+  }
+
+  .install-guidance {
+    border-top-color: #5a2a2a;
+  }
+
+  .install-guidance p {
+    color: #aaa;
+  }
+
+  .install-guidance a {
+    color: #5c8ce6;
+  }
+
+  .error-detail {
+    color: #ff6b6b;
+  }
+
+  .optional-tools-section {
+    border-top-color: #444;
+  }
+
+  .optional-tools-section h3 {
+    color: #aaa;
+  }
+
+  .optional-description {
+    color: #888;
+  }
+
+  .optional-tool-item {
+    border-color: #444;
+    background-color: #2a2a2a;
+  }
+
+  .optional-tool-item.installed {
+    background-color: #1a2a1a;
+    border-color: #2e5a2e;
+  }
+
+  .optional-tool-item.not-installed {
+    background-color: #2a2a2a;
+    border-color: #444;
+  }
+
+  .optional-tool-version {
+    color: #aaa;
+  }
+
+  .optional-tool-description {
+    color: #888;
+  }
+
+  .status-dot.gray {
+    background-color: #666;
+  }
+}

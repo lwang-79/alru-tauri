@@ -1,0 +1,335 @@
+/* App Selection Step Specific Styles */
+
+/* Branches Section */
+.branches-container {
+  margin-bottom: 2rem;
+}
+
+.branches-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.branch-chip {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.branch-chip:hover {
+  border-color: #396cd8;
+  background-color: #f8faff;
+}
+
+.branch-chip.selected {
+  border-color: #396cd8;
+  background-color: #396cd8;
+  color: white;
+}
+
+.branch-chip.protected {
+  border-color: #f57c00;
+  background-color: #fff8f0;
+  cursor: pointer;
+  color: #333;
+}
+
+.branch-chip.protected:hover {
+  border-color: #f57c00;
+  background-color: #ffe8d0;
+}
+
+.branch-chip.protected.selected {
+  border-color: #f57c00;
+  background-color: #f57c00;
+  color: white;
+}
+
+.protected-icon {
+  font-size: 0.85rem;
+}
+
+.no-branches-message {
+  color: #888;
+  font-style: italic;
+}
+
+/* Lambda Functions Section */
+.lambda-container {
+  margin-bottom: 2rem;
+}
+
+.lambda-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lambda-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lambda-card.outdated {
+  border-color: #f57c00;
+  background-color: #fff8f0;
+}
+
+.lambda-card.current {
+  border-color: #4caf50;
+  background-color: #f0f8f0;
+}
+
+.lambda-card.non-nodejs {
+  border-color: #9e9e9e;
+  background-color: #fafafa;
+}
+
+.lambda-info {
+  flex: 1;
+}
+
+.lambda-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lambda-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.runtime-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.runtime-badge.outdated {
+  background-color: #f57c00;
+  color: white;
+}
+
+.runtime-badge.current {
+  background-color: #4caf50;
+  color: white;
+}
+
+.runtime-badge.non-nodejs {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+.status-hint {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.status-hint strong {
+  color: #4caf50;
+}
+
+.non-nodejs-hint {
+  color: #757575;
+  font-style: italic;
+}
+
+.current-hint {
+  color: #2e7d32;
+}
+
+.auto-managed-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.custom-function-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  background-color: #fbe9cb;
+  color: #e65100;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.lambda-summary {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.summary-outdated {
+  color: #e65100;
+}
+
+.summary-non-nodejs {
+  color: #757575;
+}
+
+.summary-all-good {
+  color: #2e7d32;
+}
+
+.all-current-message {
+  text-align: center;
+  padding: 1.5rem;
+  color: #2e7d32;
+  background-color: #f0f8f0;
+  border: 1px solid #4caf50;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.all-current-message .icon {
+  font-size: 1.2rem;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .branch-chip {
+    border-color: #444;
+    background-color: #2a2a2a;
+    color: #eee;
+  }
+
+  .branch-chip:hover {
+    border-color: #5c8ce6;
+    background-color: #333;
+  }
+
+  .branch-chip.selected {
+    border-color: #5c8ce6;
+    background-color: #5c8ce6;
+  }
+
+  .branch-chip.protected {
+    border-color: #f57c00;
+    background-color: #3a2a1a;
+    cursor: pointer;
+    color: #ffb74d;
+  }
+
+  .branch-chip.protected:hover {
+    border-color: #f57c00;
+    background-color: #4a3a2a;
+  }
+
+  .branch-chip.protected.selected {
+    border-color: #f57c00;
+    background-color: #f57c00;
+    color: white;
+  }
+
+  .no-branches-message {
+    color: #888;
+  }
+
+  .lambda-card {
+    border-color: #444;
+    background-color: #2a2a2a;
+  }
+
+  .lambda-card.outdated {
+    border-color: #f57c00;
+    background-color: #3a2a1a;
+  }
+
+  .lambda-card.current {
+    border-color: #4caf50;
+    background-color: #1a2a1a;
+  }
+
+  .lambda-card.non-nodejs {
+    border-color: #757575;
+    background-color: #2a2a2a;
+  }
+
+  .lambda-name {
+    color: #eee;
+  }
+
+  .all-current-message {
+    background-color: #1a2a1a;
+    border-color: #2e7d32;
+    color: #66bb6a;
+  }
+
+  .status-hint {
+    color: #aaa;
+  }
+
+  .status-hint strong {
+    color: #66bb6a;
+  }
+
+  .non-nodejs-hint {
+    color: #9e9e9e;
+  }
+
+  .current-hint {
+    color: #66bb6a;
+  }
+
+  .auto-managed-badge {
+    background-color: #1a3a5c;
+    color: #64b5f6;
+  }
+
+  .custom-function-badge {
+    background-color: #3a2a1a;
+    color: #ffb74d;
+  }
+
+  .lambda-summary {
+    background-color: #2a2a2a;
+  }
+
+  .summary-outdated {
+    color: #ffb74d;
+  }
+
+  .summary-non-nodejs {
+    color: #9e9e9e;
+  }
+
+  .summary-all-good {
+    color: #66bb6a;
+  }
+}
