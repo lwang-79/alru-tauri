@@ -1136,7 +1136,7 @@ fn is_auto_managed_function(tags: &[ResourceTag], repo_name: &str) -> bool {
     let friendly_name = tags.iter().find(|t| t.key == "amplify:friendly-name");
     if let Some(tag) = friendly_name {
         // If friendly-name equals repository name (case-insensitive), it's auto-managed
-        return tag.value.to_lowercase() == repo_name.to_lowercase();
+        return tag.value.to_lowercase().contains(&repo_name.to_lowercase());
     }
 
     // Fallback: check aws:cloudformation:logical-id (Gen1)

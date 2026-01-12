@@ -341,13 +341,16 @@ pub async fn install_dependencies(
     }
 }
 
-/// Runs `amplify pull --appId <appId> --envName <envName> --yes` with streaming output.
-/// This pulls the Amplify project configuration and backend resources.
+/// Runs `amplify pull` command with streaming output.
+/// For Gen1 apps, uses headless mode with environment variables.
+/// For Gen2 apps, uses the standard command.
 ///
 /// # Arguments
 /// * `project_path` - Path to the project directory
 /// * `app_id` - The Amplify app ID
 /// * `env_name` - The Amplify environment name (typically the branch name)
+/// * `backend_type` - The backend type ("Gen1" or "Gen2")
+/// * `profile_name` - AWS profile name (required for Gen1 headless mode)
 /// * `window` - Tauri window for emitting events
 ///
 /// # Returns
@@ -362,6 +365,8 @@ pub async fn amplify_pull_streaming(
     project_path: String,
     app_id: String,
     env_name: String,
+    backend_type: String,
+    profile_name: String,
     window: tauri::Window,
 ) -> Result<bool, String> {
     use std::io::{BufRead, BufReader};
@@ -388,16 +393,57 @@ pub async fn amplify_pull_streaming(
         format!("\n=== Pulling Amplify Project ===\n"),
     );
     let _ = window.emit("prepare-output", format!("App ID: {}\n", app_id));
-    let _ = window.emit("prepare-output", format!("Environment: {}\n\n", env_name));
+    let _ = window.emit("prepare-output", format!("Environment: {}\n", env_name));
+    let _ = window.emit(
+        "prepare-output",
+        format!("Backend Type: {}\n\n", backend_type),
+    );
 
-    // Spawn the amplify pull process
-    let mut child = Command::new("amplify")
-        .args(["pull", "--appId", &app_id, "--envName", &env_name, "--yes"])
-        .current_dir(&project_path)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .map_err(|e| format!("Failed to start amplify pull: {}", e))?;
+    // Create the command based on backend type
+    let mut child = if backend_type == "Gen1" {
+        // For Gen1, use headless mode with environment variables
+        let _ = window.emit("prepare-output", "Using headless mode for Gen1 app...\n");
+
+        // Create environment variables for headless mode
+        let aws_cloudformation_config = format!(
+            r#"{{"configLevel":"project","useProfile":true,"profileName":"{}"}}"#,
+            profile_name
+        );
+        let amplify_config = format!(
+            r#"{{"appId":"{}","envName":"{}","defaultEditor":"code"}}"#,
+            app_id, env_name
+        );
+        let providers_config = format!(r#"{{"awscloudformation":{}}}"#, aws_cloudformation_config);
+
+        Command::new("amplify")
+            .args([
+                "pull",
+                "--amplify",
+                &amplify_config,
+                "--providers",
+                &providers_config,
+                "--yes",
+            ])
+            .env("AWSCLOUDFORMATIONCONFIG", &aws_cloudformation_config)
+            .env("AMPLIFY", &amplify_config)
+            .env("PROVIDERS", &providers_config)
+            .current_dir(&project_path)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|e| format!("Failed to start amplify pull (headless): {}", e))?
+    } else {
+        // For Gen2, use standard command
+        let _ = window.emit("prepare-output", "Using standard mode for Gen2 app...\n");
+
+        Command::new("amplify")
+            .args(["pull", "--appId", &app_id, "--envName", &env_name, "--yes"])
+            .current_dir(&project_path)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|e| format!("Failed to start amplify pull: {}", e))?
+    };
 
     let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
     let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
@@ -619,13 +665,16 @@ pub async fn amplify_env_checkout_streaming(
     }
 }
 
-/// Runs `amplify pull --appId <appId> --envName <envName>` to pull the existing Amplify project.
-/// This is required for Gen1 backends to initialize the amplify folder with the correct configuration.
+/// Runs `amplify pull` command to pull the existing Amplify project.
+/// For Gen1 apps, uses headless mode with environment variables.
+/// For Gen2 apps, uses the standard command.
 ///
 /// # Arguments
 /// * `project_path` - Path to the project directory
 /// * `app_id` - The Amplify app ID
 /// * `env_name` - The Amplify environment name (typically the branch name)
+/// * `backend_type` - The backend type ("Gen1" or "Gen2")
+/// * `profile_name` - AWS profile name (required for Gen1 headless mode)
 ///
 /// # Returns
 /// * `Ok(true)` - Pull successful
@@ -635,6 +684,8 @@ pub async fn amplify_pull(
     project_path: &str,
     app_id: &str,
     env_name: &str,
+    backend_type: &str,
+    profile_name: &str,
 ) -> Result<bool, String> {
     // First check if amplify CLI is available
     let amplify_check = Command::new("amplify").arg("--version").output();
@@ -646,12 +697,42 @@ pub async fn amplify_pull(
         );
     }
 
-    // Run amplify pull with --yes to accept defaults
-    let output = Command::new("amplify")
-        .args(["pull", "--appId", app_id, "--envName", env_name, "--yes"])
-        .current_dir(project_path)
-        .output()
-        .map_err(|e| format!("Failed to execute amplify pull: {}", e))?;
+    // Run amplify pull command based on backend type
+    let output = if backend_type == "Gen1" {
+        // For Gen1, use headless mode with environment variables
+        let aws_cloudformation_config = format!(
+            r#"{{"configLevel":"project","useProfile":true,"profileName":"{}"}}"#,
+            profile_name
+        );
+        let amplify_config = format!(
+            r#"{{"appId":"{}","envName":"{}","defaultEditor":"code"}}"#,
+            app_id, env_name
+        );
+        let providers_config = format!(r#"{{"awscloudformation":{}}}"#, aws_cloudformation_config);
+
+        Command::new("amplify")
+            .args([
+                "pull",
+                "--amplify",
+                &amplify_config,
+                "--providers",
+                &providers_config,
+                "--yes",
+            ])
+            .env("AWSCLOUDFORMATIONCONFIG", &aws_cloudformation_config)
+            .env("AMPLIFY", &amplify_config)
+            .env("PROVIDERS", &providers_config)
+            .current_dir(project_path)
+            .output()
+            .map_err(|e| format!("Failed to execute amplify pull (headless): {}", e))?
+    } else {
+        // For Gen2, use standard command
+        Command::new("amplify")
+            .args(["pull", "--appId", app_id, "--envName", env_name, "--yes"])
+            .current_dir(project_path)
+            .output()
+            .map_err(|e| format!("Failed to execute amplify pull: {}", e))?
+    };
 
     if output.status.success() {
         println!("[amplify_pull] Successfully pulled Amplify project");
@@ -1904,7 +1985,7 @@ pub struct SandboxResult {
 }
 
 /// Deploys a Gen2 sandbox for testing.
-/// This runs `npx ampx sandbox --profile <profile>` and monitors for completion.
+/// This runs `npx ampx sandbox --profile <profile>` with AWS_REGION override and monitors for completion.
 /// The command is a long-running process that watches for file changes.
 /// Completion is detected when output contains "Watching for file changes" and "File written:"
 /// with no new output for 10 seconds.
@@ -1912,6 +1993,7 @@ pub struct SandboxResult {
 /// # Arguments
 /// * `project_path` - Path to the project directory
 /// * `profile` - AWS profile to use
+/// * `region` - AWS region to override profile default
 /// * `window` - Tauri window for emitting events
 ///
 /// # Returns
@@ -1924,6 +2006,7 @@ pub struct SandboxResult {
 pub async fn deploy_gen2_sandbox(
     project_path: String,
     profile: String,
+    region: String,
     window: tauri::Window,
 ) -> Result<SandboxResult, String> {
     use std::io::{BufRead, BufReader};
@@ -1938,18 +2021,20 @@ pub async fn deploy_gen2_sandbox(
 
     // Emit initial status
     let _ = window.emit("sandbox-output", "=== Deploying Gen2 Sandbox ===\n");
-    let _ = window.emit("sandbox-output", format!("Profile: {}\n\n", profile));
+    let _ = window.emit("sandbox-output", format!("Profile: {}\n", profile));
+    let _ = window.emit("sandbox-output", format!("Region: {}\n", region));
     let _ = window.emit(
         "sandbox-output",
         format!("Working directory: {}\n\n", project_path),
     );
     let _ = window.emit("sandbox-status", "running");
 
-    // Spawn the sandbox process
+    // Spawn the sandbox process with AWS_REGION override
     // Clear environment variables that might cause npx to detect wrong package manager
     let mut child = Command::new("npx")
         .args(["ampx", "sandbox", "--profile", &profile])
         .current_dir(&project_path)
+        .env("AWS_REGION", &region)
         .env_remove("npm_config_user_agent")
         .env_remove("npm_execpath")
         .env_remove("BUN_INSTALL")
@@ -1989,8 +2074,9 @@ pub async fn deploy_gen2_sandbox(
     let mut error_message: Option<String> = None;
 
     let completion_timeout = Duration::from_secs(10); // 10 seconds of no output after completion pattern
-    let max_timeout = Duration::from_secs(600); // 10 minutes max
-    let start_time = Instant::now();
+                                                      // Removed max timeout - let sandbox deployment run until completion
+                                                      // let max_timeout = Duration::from_secs(600); // 10 minutes max
+                                                      // let start_time = Instant::now();
 
     loop {
         // Try to receive output with a short timeout
@@ -2075,20 +2161,20 @@ pub async fn deploy_gen2_sandbox(
             }
         }
 
-        // Check for max timeout
-        if start_time.elapsed() >= max_timeout {
-            let _ = window.emit(
-                "sandbox-output",
-                "\n⚠ Deployment is taking longer than expected (10 minutes).\n",
-            );
-            let _ = window.emit(
-                "sandbox-output",
-                "Please monitor the AWS CloudFormation console for deployment status.\n",
-            );
-            let _ = window.emit("sandbox-status", "timeout");
-            let _ = child.kill();
-            break;
-        }
+        // Removed max timeout check - let deployment run until completion
+        // if start_time.elapsed() >= max_timeout {
+        //     let _ = window.emit(
+        //         "sandbox-output",
+        //         "\n⚠ Deployment is taking longer than expected (10 minutes).\n",
+        //     );
+        //     let _ = window.emit(
+        //         "sandbox-output",
+        //         "Please monitor the AWS CloudFormation console for deployment status.\n",
+        //     );
+        //     let _ = window.emit("sandbox-status", "timeout");
+        //     let _ = child.kill();
+        //     break;
+        // }
     }
 
     // Wait for reader threads to finish
@@ -2110,31 +2196,39 @@ pub async fn deploy_gen2_sandbox(
             status: "failed".to_string(),
         })
     } else {
+        // This case should now only occur if deployment actually failed, not timed out
         Ok(SandboxResult {
             success: false,
             output: all_output,
             error: Some(
-                "Deployment timed out. Please check AWS CloudFormation console.".to_string(),
+                "Deployment failed or was interrupted. Please check AWS CloudFormation console."
+                    .to_string(),
             ),
-            status: "timeout".to_string(),
+            status: "failed".to_string(),
         })
     }
 }
 
 /// Deletes a Gen2 sandbox.
-/// This runs `npx ampx sandbox delete --profile <profile> -y`.
+/// This runs `npx ampx sandbox delete --profile <profile> -y` with AWS_REGION override.
 ///
 /// # Arguments
 /// * `project_path` - Path to the project directory
 /// * `profile` - AWS profile to use
+/// * `region` - AWS region to override profile default
 ///
 /// # Returns
 /// * `BuildResult` - Contains success status, output, and any error message
 #[tauri::command]
-pub async fn delete_gen2_sandbox(project_path: &str, profile: &str) -> Result<BuildResult, String> {
+pub async fn delete_gen2_sandbox(
+    project_path: &str,
+    profile: &str,
+    region: &str,
+) -> Result<BuildResult, String> {
     let output = Command::new("npx")
         .args(["ampx", "sandbox", "delete", "--profile", profile, "-y"])
         .current_dir(project_path)
+        .env("AWS_REGION", region)
         .env_remove("npm_config_user_agent")
         .env_remove("npm_execpath")
         .env_remove("BUN_INSTALL")
