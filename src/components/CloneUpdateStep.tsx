@@ -188,6 +188,49 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
     }
   });
 
+  // Reset all local state when repository is cleaned up
+  createEffect(() => {
+    const clonePath = appState.repository.clonePath;
+
+    // If clonePath becomes null, it means the repository was cleaned up
+    // Reset all local signals to their initial state
+    if (clonePath === null) {
+      console.log(
+        "[CloneUpdateStep] Repository cleaned up, resetting local state",
+      );
+
+      // Reset operation statuses
+      setCloneStatus("pending");
+      setPrepareStatus("pending");
+      setUpdateStatus("pending");
+      setEnvVarStatus("pending");
+      setBuildConfigStatus("pending");
+      setGen2EnvVarStatus("pending");
+
+      // Reset error messages
+      setCloneError(null);
+      setPrepareError(null);
+      setPrepareOutput("");
+      setUpdateError(null);
+      setUpgradeMessage(null);
+      setBuildError(null);
+      setEnvVarError(null);
+      setEnvVarMessage(null);
+      setBuildConfigError(null);
+      setBuildConfigMessage(null);
+      setGen2EnvVarError(null);
+      setGen2EnvVarMessage(null);
+
+      // Reset output
+      setBuildOutput("");
+      setSandboxError(null);
+      setSandboxOutput("");
+
+      // Reset copy feedback
+      setPathCopied(false);
+    }
+  });
+
   // Check if error is a permission/authentication issue
   const isPermissionError = (error: string): boolean => {
     const permissionPatterns = [
@@ -376,6 +419,8 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               projectPath: clonePath,
               appId: selectedApp.app_id,
               envName: selectedBranch.backend_environment_name,
+              backendType: backendType,
+              profileName: appState.awsConfig.selectedProfile,
             });
 
             // Then run amplify env checkout to switch to the correct environment with streaming
@@ -387,7 +432,7 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
             // If amplify commands fail, show a warning but don't fail the whole step
             console.warn("Amplify setup warning:", e);
             setPrepareError(
-              `Warning: ${String(e)}\n\nYou may need to manually run 'amplify pull --appId ${selectedApp.app_id} --envName ${selectedBranch.backend_environment_name}' if there are issues.`,
+              `Warning: ${String(e)}\n\nYou may need to manually run the amplify pull command if there are issues.`,
             );
             // Still mark as success since dependencies are installed
             setPrepareStatus("success");
@@ -571,8 +616,9 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
   const handleSandboxDeploy = async () => {
     const clonePath = appState.repository.clonePath;
     const profile = appState.awsConfig.selectedProfile;
+    const region = appState.awsConfig.selectedRegion;
 
-    if (!clonePath || !profile) {
+    if (!clonePath || !profile || !region) {
       setSandboxError("Missing required information for sandbox deployment");
       return;
     }
@@ -605,6 +651,7 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
       const result = await invoke<SandboxResult>("deploy_gen2_sandbox", {
         projectPath: clonePath,
         profile: profile,
+        region: region,
       });
 
       // Final result handling

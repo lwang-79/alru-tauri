@@ -32,7 +32,8 @@ export function CleanupDialog(props: CleanupDialogProps) {
         // Delete sandbox if it was deployed and user opted to delete it
         if (appState.repository.sandboxDeployed && deleteSandboxOnCleanup()) {
           const profile = appState.awsConfig.selectedProfile;
-          if (profile) {
+          const region = appState.awsConfig.selectedRegion;
+          if (profile && region) {
             try {
               // Start sandbox deletion and show monitoring link
               setSandboxDeletionInProgress(true);
@@ -40,6 +41,7 @@ export function CleanupDialog(props: CleanupDialogProps) {
               await invoke("delete_gen2_sandbox", {
                 projectPath: appState.repository.clonePath,
                 profile: profile,
+                region: region,
               });
 
               setSandboxDeletionInProgress(false);

@@ -209,6 +209,10 @@ export function ProfileRegionStep(props: ProfileRegionStepProps) {
           <p class="field-hint">
             Select the region where your Amplify app is deployed
           </p>
+          <p class="message warning">
+            If the selected region is different from the profile's configured
+            region, amplify pull may fail for Gen 1 App.
+          </p>
         </div>
       </div>
 
