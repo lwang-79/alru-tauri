@@ -1,5 +1,4 @@
-// Prerequisites module - verifies required tools are installed
-
+use crate::command::CommandExtClean;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 
@@ -86,6 +85,7 @@ fn check_network() -> ToolStatus {
 
     for endpoint in &endpoints {
         match std::process::Command::new("curl")
+            .clean_env()
             .args(["-s", "-I", "--connect-timeout", "10", endpoint])
             .output()
         {
@@ -107,6 +107,7 @@ fn check_network() -> ToolStatus {
 
     // If curl is not available, try ping as fallback
     match std::process::Command::new("ping")
+        .clean_env()
         .args(["-c", "1", "-W", "5000", "8.8.8.8"]) // Google DNS
         .output()
     {
@@ -128,7 +129,7 @@ fn check_network() -> ToolStatus {
 
 /// Check if AWS CLI is installed and get its version
 fn check_aws_cli() -> ToolStatus {
-    match Command::new("aws").arg("--version").output() {
+    match Command::new("aws").clean_env().arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
@@ -154,7 +155,7 @@ fn check_aws_cli() -> ToolStatus {
 
 /// Check if Git is installed and get its version
 fn check_git() -> ToolStatus {
-    match Command::new("git").arg("--version").output() {
+    match Command::new("git").clean_env().arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
@@ -172,7 +173,7 @@ fn check_git() -> ToolStatus {
 
 /// Check if Node.js is installed and get its version
 fn check_nodejs() -> ToolStatus {
-    match Command::new("node").arg("--version").output() {
+    match Command::new("node").clean_env().arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
@@ -190,7 +191,7 @@ fn check_nodejs() -> ToolStatus {
 
 /// Check if Amplify CLI is installed and get its version
 fn check_amplify_cli() -> ToolStatus {
-    match Command::new("amplify").arg("-v").output() {
+    match Command::new("amplify").clean_env().arg("-v").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -209,7 +210,7 @@ fn check_amplify_cli() -> ToolStatus {
 
 /// Check if npm is installed and get its version
 fn check_npm() -> ToolStatus {
-    match Command::new("npm").arg("--version").output() {
+    match Command::new("npm").clean_env().arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -224,7 +225,7 @@ fn check_npm() -> ToolStatus {
 
 /// Check if yarn is installed and get its version
 fn check_yarn() -> ToolStatus {
-    match Command::new("yarn").arg("--version").output() {
+    match Command::new("yarn").clean_env().arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -239,7 +240,7 @@ fn check_yarn() -> ToolStatus {
 
 /// Check if pnpm is installed and get its version
 fn check_pnpm() -> ToolStatus {
-    match Command::new("pnpm").arg("--version").output() {
+    match Command::new("pnpm").clean_env().arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -254,7 +255,7 @@ fn check_pnpm() -> ToolStatus {
 
 /// Check if bun is installed and get its version
 fn check_bun() -> ToolStatus {
-    match Command::new("bun").arg("--version").output() {
+    match Command::new("bun").clean_env().arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();

@@ -3,7 +3,6 @@
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::path::PathBuf;
-use std::process::Command;
 
 /// Result of cloning a repository
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,10 +20,23 @@ pub struct CommitPushResult {
     pub error: Option<String>,
 }
 
-/// Get a temporary directory path for cloning repositories
 fn get_temp_clone_dir() -> PathBuf {
-    let temp_dir = env::temp_dir();
-    temp_dir.join("amplify-runtime-updater")
+    use dirs;
+    let base = match dirs::home_dir() {
+        Some(path) => {
+            println!("[get_temp_clone_dir] Using home dir: {:?}", path);
+            path.join(".alru-cache")
+        }
+        None => {
+            let path = env::temp_dir().join("amplify-runtime-updater");
+            println!(
+                "[get_temp_clone_dir] Home dir not found, using temp dir: {:?}",
+                path
+            );
+            path
+        }
+    };
+    base
 }
 
 /// Generate a unique directory name for a repository clone
@@ -48,7 +60,7 @@ fn generate_clone_dir_name(url: &str, branch: &str) -> String {
 
 /// Execute a git command in a specific directory
 fn execute_git_command(args: &[&str], cwd: Option<&str>) -> Result<String, String> {
-    let mut cmd = Command::new("git");
+    let mut cmd = crate::command::create_clean_command("git");
     cmd.args(args);
 
     if let Some(dir) = cwd {

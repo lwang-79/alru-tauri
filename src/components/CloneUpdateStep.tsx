@@ -16,7 +16,10 @@ import type {
 } from "../types";
 import { appState, setAppState } from "../store/appStore";
 import "./shared.css";
+import "./shared.css";
 import "./CloneUpdateStep.css";
+import { LogViewer } from "./common/LogViewer";
+import { OperationCard } from "./common/OperationCard";
 
 interface CloneUpdateStepProps {
   onComplete?: () => void;
@@ -155,38 +158,6 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
     }, 10);
   });
 
-  // Auto-scroll prepare output when new content arrives
-  createEffect(() => {
-    const output = prepareOutput();
-    if (output) {
-      const pre = document.getElementById("prepare-output-pre");
-      if (pre) {
-        pre.scrollTop = pre.scrollHeight;
-      }
-    }
-  });
-
-  // Auto-scroll sandbox output when new content arrives
-  createEffect(() => {
-    const output = sandboxOutput();
-    if (output) {
-      const pre = document.getElementById("sandbox-output-pre");
-      if (pre) {
-        pre.scrollTop = pre.scrollHeight;
-      }
-    }
-  });
-
-  // Auto-scroll build output when new content arrives
-  createEffect(() => {
-    const output = buildOutput();
-    if (output) {
-      const pre = document.getElementById("build-output-pre");
-      if (pre) {
-        pre.scrollTop = pre.scrollHeight;
-      }
-    }
-  });
 
   // Reset all local state when repository is cleaned up
   createEffect(() => {
@@ -395,7 +366,8 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
       });
 
       if (backendType === "Gen1") {
-        // Gen1: Install dependencies first, then Amplify setup, then CLI upgrade
+        // Gen1: Install dependencies first, then Upgrade CLI, then Amplify setup (Pull & Checkout)
+        // This matches the original proven workflow
         console.log(
           "[handlePrepare] Gen1: Starting with dependency installation",
         );
@@ -407,57 +379,47 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
         });
 
         console.log(
-          "[handlePrepare] Gen1: Dependencies installed, proceeding with Amplify setup",
+          "[handlePrepare] Gen1: Dependencies installed, proceeding with CLI check",
         );
 
-        // Step 2: Run amplify pull and env checkout
+        // Step 2: Upgrade Amplify CLI globally for Gen1
+        // We do this before pull to ensure we have the latest CLI features
+        const upgradeResult = await invoke<UpgradeResult>("upgrade_amplify_cli");
+        if (upgradeResult.skipped) {
+          setUpgradeMessage(upgradeResult.message);
+        } else {
+          setUpgradeMessage(`Upgraded to version ${upgradeResult.latest_version}`);
+        }
+
+        console.log(
+          "[handlePrepare] Gen1: CLI checked/upgraded, proceeding with Amplify setup",
+        );
+
+        // Step 3: Run amplify pull (this also initializes the environment)
         if (selectedBranch && selectedApp) {
           try {
-            // First run amplify pull to initialize the project with streaming
-            // Use backend_environment_name instead of branch_name as they can be different
+            // Run amplify pull to initialize the project and checkout the env
             await invoke<boolean>("amplify_pull_streaming", {
               projectPath: clonePath,
               appId: selectedApp.app_id,
               envName: selectedBranch.backend_environment_name,
-              backendType: backendType,
               profileName: appState.awsConfig.selectedProfile,
             });
-
-            // Then run amplify env checkout to switch to the correct environment with streaming
-            await invoke<boolean>("amplify_env_checkout_streaming", {
-              projectPath: clonePath,
-              envName: selectedBranch.backend_environment_name,
-            });
           } catch (e) {
-            // If amplify commands fail, show a warning but don't fail the whole step
+            // If amplify commands fail, show a warning
             console.warn("Amplify setup warning:", e);
             setPrepareError(
               `Warning: ${String(e)}\n\nYou may need to manually run the amplify pull command if there are issues.`,
             );
-            // Still mark as success since dependencies are installed
-            setPrepareStatus("success");
-            setAppState(
-              "repository",
-              "operationStatus",
-              "prepareComplete",
-              true,
-            );
-            setAppState(
-              "repository",
-              "operationStatus",
-              "upgradeComplete",
-              true,
-            );
+            // Don't mark as complete if critical setup fails, or maybe we should?
+            // The previous logic allowed it to proceed with warning.
+            // But if pull fails, usually we can't build.
+            // Let's stick to the previous pattern: return early but don't hard-fail?
+            // User request implies this Step MUST work.
+            // If pull fails here, we should probably STOP and let them retry.
+            setPrepareStatus("failed");
             return;
           }
-        }
-
-        // Step 3: Upgrade Amplify CLI globally for Gen1
-        const result = await invoke<UpgradeResult>("upgrade_amplify_cli");
-        if (result.skipped) {
-          setUpgradeMessage(result.message);
-        } else {
-          setUpgradeMessage(`Upgraded to version ${result.latest_version}`);
         }
       } else {
         // Gen2: Upgrade Amplify packages first (includes full install), more efficient
@@ -962,45 +924,22 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
       {/* Operations */}
       <div class="operations-container">
         {/* Step 1: Clone Repository & Detect Configuration */}
-        <div class={`operation-card ${cloneStatus()}`}>
-          <div class="operation-header">
-            <div class="operation-number">1</div>
-            <div class="operation-info">
-              <h3>Clone Repository</h3>
-              <p>Clone the repository and detect project configuration</p>
-            </div>
-            <div class="operation-status">
-              <Show when={cloneStatus() === "pending"}>
-                <button class="action-button" onClick={handleClone}>
-                  Clone
-                </button>
-              </Show>
-              <Show when={cloneStatus() === "running"}>
-                <span class="status-indicator running">
-                  <span class="spinner-small"></span>
-                  Cloning...
-                </span>
-              </Show>
-              <Show when={cloneStatus() === "success"}>
-                <span class="status-indicator success">✓ Cloned</span>
-              </Show>
-              <Show when={cloneStatus() === "failed"}>
-                <span class="status-indicator failed">✗ Failed</span>
-              </Show>
-            </div>
-          </div>
-          <Show when={cloneError()}>
-            <div class="operation-error permission-error">
-              <pre class="error-message-text">{cloneError()}</pre>
-            </div>
-          </Show>
-          <Show when={cloneStatus() === "failed"}>
-            <div class="operation-retry-row">
-              <button class="retry-link" onClick={handleClone}>
-                Retry Clone
-              </button>
-            </div>
-          </Show>
+        {/* Step 1: Clone Repository & Detect Configuration */}
+        <OperationCard
+          stepNumber={1}
+          title="Clone Repository"
+          description="Clone the repository and detect project configuration"
+          status={cloneStatus()}
+          onAction={handleClone}
+          actionLabel="Clone"
+          runningLabel="Cloning..."
+          successLabel="✓ Cloned"
+          failedLabel="✗ Failed"
+          error={cloneError()}
+          isPermissionError={
+            !!cloneError() && isPermissionError(cloneError()!)
+          }
+        >
           <Show
             when={cloneStatus() === "success" && appState.repository.clonePath}
           >
@@ -1074,118 +1013,60 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               </div>
             </div>
           </Show>
-        </div>
+        </OperationCard>
 
         {/* Step 2: Prepare Project */}
         <Show when={cloneStatus() === "success"}>
-          <div class={`operation-card ${prepareStatus()}`}>
-            <div class="operation-header">
-              <div class="operation-number">2</div>
-              <div class="operation-info">
-                <h3>Prepare Project</h3>
-                <p>
-                  Install dependencies, upgrade Amplify packages
-                  <Show when={appState.repository.backendType === "Gen1"}>
-                    {" "}
-                    and pull Amplify environment
-                  </Show>
-                </p>
-              </div>
-              <div class="operation-status">
-                <Show when={prepareStatus() === "pending"}>
-                  <button class="action-button" onClick={handlePrepare}>
-                    Prepare
-                  </button>
+          <OperationCard
+            stepNumber={2}
+            title="Prepare Project"
+            description={
+              <>
+                Install dependencies, upgrade Amplify packages
+                <Show when={appState.repository.backendType === "Gen1"}>
+                  {" "}
+                  and pull Amplify environment
                 </Show>
-                <Show when={prepareStatus() === "running"}>
-                  <span class="status-indicator running">
-                    <span class="spinner-small"></span>
-                    Preparing...
-                  </span>
-                </Show>
-                <Show when={prepareStatus() === "success"}>
-                  <span class="status-indicator success">✓ Prepared</span>
-                </Show>
-                <Show when={prepareStatus() === "failed"}>
-                  <span class="status-indicator failed">✗ Failed</span>
-                </Show>
-              </div>
-            </div>
-            <Show when={prepareError()}>
-              <div class="operation-error permission-error">
-                <pre class="error-message-text">{prepareError()}</pre>
-              </div>
-            </Show>
+              </>
+            }
+            status={prepareStatus()}
+            onAction={handlePrepare}
+            actionLabel="Prepare"
+            runningLabel="Preparing..."
+            successLabel="✓ Prepared"
+            failedLabel="✗ Failed"
+            error={prepareError()}
+            isPermissionError={true}
+          >
             <Show when={prepareOutput()}>
-              <div class="prepare-output-container">
-                <div class="prepare-output-header">
-                  <span>Preparation Output</span>
-                  <Show when={prepareStatus() === "running"}>
-                    <span class="live-indicator">● Live</span>
-                  </Show>
-                </div>
-                <pre class="prepare-output-live" id="prepare-output-pre">
-                  {prepareOutput()}
-                </pre>
-              </div>
-            </Show>
-            <Show when={prepareStatus() === "failed"}>
-              <div class="operation-retry-row">
-                <button class="retry-link" onClick={handlePrepare}>
-                  Retry Prepare
-                </button>
-              </div>
+              <LogViewer
+                output={prepareOutput()}
+                title="Preparation Output"
+                isRunning={prepareStatus() === "running"}
+              />
             </Show>
             <Show when={prepareStatus() === "success" && upgradeMessage()}>
               <div class="operation-result">
                 <p class="upgrade-message">{upgradeMessage()}</p>
               </div>
             </Show>
-          </div>
+          </OperationCard>
         </Show>
 
         {/* Step 3: Update Runtime */}
         <Show when={prepareStatus() === "success"}>
-          <div class={`operation-card ${updateStatus()}`}>
-            <div class="operation-header">
-              <div class="operation-number">3</div>
-              <div class="operation-info">
-                <h3>Update Runtime</h3>
-                <p>
-                  Update Lambda runtime configurations to{" "}
-                  {appState.runtimeInfo.targetRuntime}
-                </p>
-              </div>
-              <div class="operation-status">
-                <Show when={updateStatus() === "pending"}>
-                  <button class="action-button" onClick={handleUpdate}>
-                    Update
-                  </button>
-                </Show>
-                <Show when={updateStatus() === "running"}>
-                  <span class="status-indicator running">
-                    <span class="spinner-small"></span>
-                    Updating...
-                  </span>
-                </Show>
-                <Show when={updateStatus() === "success"}>
-                  <span class="status-indicator success">✓ Updated</span>
-                </Show>
-                <Show when={updateStatus() === "failed"}>
-                  <span class="status-indicator failed">✗ Failed</span>
-                </Show>
-              </div>
-            </div>
-            <Show when={updateError()}>
-              <div class="operation-error">{updateError()}</div>
-            </Show>
-            <Show when={updateStatus() === "failed"}>
-              <div class="operation-retry-row">
-                <button class="retry-link" onClick={handleUpdate}>
-                  Retry Update
-                </button>
-              </div>
-            </Show>
+          <OperationCard
+            stepNumber={3}
+            title="Update Runtime"
+            description={`Update Lambda runtime configurations to ${appState.runtimeInfo.targetRuntime}`}
+            status={updateStatus()}
+            onAction={handleUpdate}
+            actionLabel="Update"
+            runningLabel="Updating..."
+            successLabel="✓ Updated"
+            failedLabel="✗ Failed"
+            error={updateError()}
+          >
             <Show
               when={
                 updateStatus() === "success" &&
@@ -1226,7 +1107,7 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                 </p>
               </div>
             </Show>
-          </div>
+          </OperationCard>
         </Show>
 
         {/* Step 4: Update Build Configuration (Gen2 only, required) */}
@@ -1236,48 +1117,18 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
             appState.repository.backendType === "Gen2"
           }
         >
-          <div class={`operation-card ${buildConfigStatus()}`}>
-            <div class="operation-header">
-              <div class="operation-number">4</div>
-              <div class="operation-info">
-                <h3>Update Build Configuration</h3>
-                <p>Update Amplify build command to use pipeline-deploy</p>
-              </div>
-              <div class="operation-status">
-                <Show when={buildConfigStatus() === "pending"}>
-                  <button
-                    class="action-button"
-                    onClick={handleBuildConfigUpdate}
-                  >
-                    Update
-                  </button>
-                </Show>
-                <Show when={buildConfigStatus() === "running"}>
-                  <span class="status-indicator running">
-                    <span class="spinner-small"></span>
-                    Updating...
-                  </span>
-                </Show>
-                <Show when={buildConfigStatus() === "success"}>
-                  <span class="status-indicator success">✓ Updated</span>
-                </Show>
-                <Show when={buildConfigStatus() === "failed"}>
-                  <span class="status-indicator failed">✗ Failed</span>
-                </Show>
-              </div>
-            </div>
-            <Show when={buildConfigError()}>
-              <div class="operation-error">
-                <pre class="error-message-text">{buildConfigError()}</pre>
-              </div>
-            </Show>
-            <Show when={buildConfigStatus() === "failed"}>
-              <div class="operation-retry-row">
-                <button class="retry-link" onClick={handleBuildConfigUpdate}>
-                  Retry Config
-                </button>
-              </div>
-            </Show>
+          <OperationCard
+            stepNumber={4}
+            title="Update Build Configuration"
+            description="Update Amplify build command to use pipeline-deploy"
+            status={buildConfigStatus()}
+            onAction={handleBuildConfigUpdate}
+            actionLabel="Update"
+            runningLabel="Updating..."
+            successLabel="✓ Updated"
+            failedLabel="✗ Failed"
+            error={buildConfigError()}
+          >
             <Show
               when={buildConfigStatus() === "success" && buildConfigMessage()}
             >
@@ -1294,7 +1145,7 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                     <span class="result-item-label-balanced">Location:</span>
                     <span class="result-item-value-balanced">
                       {appState.repository.buildConfigChange?.location ===
-                      "Cloud"
+                        "Cloud"
                         ? "AWS Cloud Configuration"
                         : appState.repository.buildConfigChange?.location}
                     </span>
@@ -1318,7 +1169,7 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                 </div>
               </div>
             </Show>
-          </div>
+          </OperationCard>
         </Show>
 
         {/* Step 5: Build Verification (Required for Gen1, Optional for Gen2) */}
@@ -1337,51 +1188,18 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               buildConfigStatus() === "success"
             }
           >
-            <div class={`operation-card ${gen2EnvVarStatus()}`}>
-              <div class="operation-header">
-                <div class="operation-number">5</div>
-                <div class="operation-info">
-                  <h3>Update Environment Variables</h3>
-                  <p>
-                    Remove legacy _CUSTOM_IMAGE variable to use default Amplify
-                    image
-                  </p>
-                </div>
-                <div class="operation-status">
-                  <Show when={gen2EnvVarStatus() === "pending"}>
-                    <button
-                      class="action-button"
-                      onClick={handleGen2EnvVarUpdate}
-                    >
-                      Update
-                    </button>
-                  </Show>
-                  <Show when={gen2EnvVarStatus() === "running"}>
-                    <span class="status-indicator running">
-                      <span class="spinner-small"></span>
-                      Updating...
-                    </span>
-                  </Show>
-                  <Show when={gen2EnvVarStatus() === "success"}>
-                    <span class="status-indicator success">✓ Updated</span>
-                  </Show>
-                  <Show when={gen2EnvVarStatus() === "failed"}>
-                    <span class="status-indicator failed">✗ Failed</span>
-                  </Show>
-                </div>
-              </div>
-              <Show when={gen2EnvVarError()}>
-                <div class="operation-error">
-                  <pre class="error-message-text">{gen2EnvVarError()}</pre>
-                </div>
-              </Show>
-              <Show when={gen2EnvVarStatus() === "failed"}>
-                <div class="operation-retry-row">
-                  <button class="retry-link" onClick={handleGen2EnvVarUpdate}>
-                    Retry Env Vars
-                  </button>
-                </div>
-              </Show>
+            <OperationCard
+              stepNumber={5}
+              title="Update Environment Variables"
+              description="Remove legacy _CUSTOM_IMAGE variable to use default Amplify image"
+              status={gen2EnvVarStatus()}
+              onAction={handleGen2EnvVarUpdate}
+              actionLabel="Update"
+              runningLabel="Updating..."
+              successLabel="✓ Updated"
+              failedLabel="✗ Failed"
+              error={gen2EnvVarError()}
+            >
               <Show
                 when={gen2EnvVarStatus() === "success" && gen2EnvVarMessage()}
               >
@@ -1397,7 +1215,7 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                   </div>
                 </div>
               </Show>
-            </div>
+            </OperationCard>
           </Show>
 
           {/* Gen2 Optional Build Test Section - Show only after all required operations are complete */}
@@ -1433,59 +1251,26 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               gen2EnvVarStatus() === "success"
             }
           >
-            <div class={`operation-card ${sandboxStatus()}`}>
-              <div class="operation-header">
-                <div class="operation-number">6a</div>
-                <div class="operation-info">
-                  <h3>Deploy Sandbox</h3>
-                  <p>Deploy Gen2 sandbox environment for testing</p>
-                </div>
-                <div class="operation-status">
-                  <Show when={sandboxStatus() === "pending"}>
-                    <button class="action-button" onClick={handleSandboxDeploy}>
-                      Deploy
-                    </button>
-                  </Show>
-                  <Show when={sandboxStatus() === "running"}>
-                    <span class="status-indicator running">
-                      <span class="spinner-small"></span>
-                      Deploying...
-                    </span>
-                  </Show>
-                  <Show when={sandboxStatus() === "success"}>
-                    <span class="status-indicator success">✓ Deployed</span>
-                  </Show>
-                  <Show when={sandboxStatus() === "failed"}>
-                    <span class="status-indicator failed">✗ Failed</span>
-                  </Show>
-                </div>
-              </div>
-              <Show when={sandboxError()}>
-                <div class="operation-error">
-                  <pre class="error-output">{sandboxError()}</pre>
-                </div>
-              </Show>
-              <Show when={sandboxStatus() === "failed"}>
-                <div class="operation-retry-row">
-                  <button class="retry-link" onClick={handleSandboxDeploy}>
-                    Retry Deploy
-                  </button>
-                </div>
-              </Show>
+            <OperationCard
+              stepNumber="6a"
+              title="Deploy Sandbox"
+              description="Deploy Gen2 sandbox environment for testing"
+              status={sandboxStatus()}
+              onAction={handleSandboxDeploy}
+              actionLabel="Deploy"
+              runningLabel="Deploying..."
+              successLabel="✓ Deployed"
+              failedLabel="✗ Failed"
+              error={sandboxError()}
+            >
               <Show when={sandboxOutput()}>
-                <div class="sandbox-output-container">
-                  <div class="sandbox-output-header">
-                    <span>Deployment Output</span>
-                    <Show when={sandboxStatus() === "running"}>
-                      <span class="live-indicator">● Live</span>
-                    </Show>
-                  </div>
-                  <pre class="sandbox-output" id="sandbox-output-pre">
-                    {sandboxOutput()}
-                  </pre>
-                </div>
+                <LogViewer
+                  output={sandboxOutput()}
+                  title="Deployment Output"
+                  isRunning={sandboxStatus() === "running"}
+                />
               </Show>
-            </div>
+            </OperationCard>
           </Show>
 
           {/* Build Verification (Required for Gen1, Optional step 5b for Gen2 when sandbox enabled) */}
@@ -1496,87 +1281,44 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                 gen2SandboxEnabled())
             }
           >
-            <div class={`operation-card ${buildStatus()}`}>
-              <div class="operation-header">
-                <div class="operation-number">
-                  <Show when={appState.repository.backendType === "Gen1"}>
-                    5
-                  </Show>
-                  <Show when={appState.repository.backendType === "Gen2"}>
-                    6b
-                  </Show>
-                </div>
-                <div class="operation-info">
-                  <h3>Build Verification</h3>
-                  <p>
-                    <Show when={appState.repository.backendType === "Gen1"}>
-                      Run amplify build and frontend build
-                    </Show>
-                    <Show when={appState.repository.backendType === "Gen2"}>
-                      Run frontend build
-                    </Show>
-                  </p>
-                </div>
-                <div class="operation-status">
-                  <Show when={buildStatus() === "pending"}>
-                    <Show when={appState.repository.backendType === "Gen1"}>
-                      <button class="action-button" onClick={handleBuild}>
-                        Build
-                      </button>
-                    </Show>
-                    <Show when={appState.repository.backendType === "Gen2"}>
-                      <Show when={sandboxStatus() === "success"}>
-                        <button class="action-button" onClick={handleBuild}>
-                          Build
-                        </button>
-                      </Show>
-                      <Show when={sandboxStatus() !== "success"}>
-                        <span class="status-indicator pending">
-                          Waiting for sandbox deployment
-                        </span>
-                      </Show>
-                    </Show>
-                  </Show>
-                  <Show when={buildStatus() === "running"}>
-                    <span class="status-indicator running">
-                      <span class="spinner-small"></span>
-                      Building...
-                    </span>
-                  </Show>
-                  <Show when={buildStatus() === "success"}>
-                    <span class="status-indicator success">✓ Build Passed</span>
-                  </Show>
-                  <Show when={buildStatus() === "failed"}>
-                    <span class="status-indicator failed">✗ Build Failed</span>
-                  </Show>
-                </div>
-              </div>
-              <Show when={buildError()}>
-                <div class="operation-error">
-                  <pre class="error-output">{buildError()}</pre>
-                </div>
-              </Show>
-              <Show when={buildStatus() === "failed"}>
-                <div class="operation-retry-row">
-                  <button class="retry-link" onClick={handleBuild}>
-                    Retry Build
-                  </button>
-                </div>
-              </Show>
+            <OperationCard
+              stepNumber={
+                appState.repository.backendType === "Gen1" ? 5 : "6b"
+              }
+              title="Build Verification"
+              description={
+                appState.repository.backendType === "Gen1"
+                  ? "Run amplify build and frontend build"
+                  : "Run frontend build"
+              }
+              status={buildStatus()}
+              onAction={
+                (appState.repository.backendType === "Gen1" ||
+                  (appState.repository.backendType === "Gen2" &&
+                    sandboxStatus() === "success"))
+                  ? handleBuild
+                  : undefined
+              }
+              actionLabel="Build"
+              pendingLabel={
+                (appState.repository.backendType === "Gen2" &&
+                  sandboxStatus() !== "success")
+                  ? "Waiting for sandbox deployment"
+                  : undefined
+              }
+              runningLabel="Building..."
+              successLabel="✓ Build Passed"
+              failedLabel="✗ Build Failed"
+              error={buildError()}
+            >
               <Show when={buildOutput()}>
-                <div class="build-output-container">
-                  <div class="build-output-header">
-                    <span>Build Output</span>
-                    <Show when={buildStatus() === "running"}>
-                      <span class="live-indicator">● Live</span>
-                    </Show>
-                  </div>
-                  <pre class="build-output-live" id="build-output-pre">
-                    {buildOutput()}
-                  </pre>
-                </div>
+                <LogViewer
+                  output={buildOutput()}
+                  title="Build Output"
+                  isRunning={buildStatus() === "running"}
+                />
               </Show>
-            </div>
+            </OperationCard>
           </Show>
 
           {/* Step 6: Update Environment Variable (Gen1 only, after build passes) */}
@@ -1586,45 +1328,18 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               buildStatus() === "success"
             }
           >
-            <div class={`operation-card ${envVarStatus()}`}>
-              <div class="operation-header">
-                <div class="operation-number">6</div>
-                <div class="operation-info">
-                  <h3>Update Environment Variables</h3>
-                  <p>Update environment variables for Gen1 backend</p>
-                </div>
-                <div class="operation-status">
-                  <Show when={envVarStatus() === "pending"}>
-                    <button class="action-button" onClick={handleEnvVarUpdate}>
-                      Update
-                    </button>
-                  </Show>
-                  <Show when={envVarStatus() === "running"}>
-                    <span class="status-indicator running">
-                      <span class="spinner-small"></span>
-                      Updating...
-                    </span>
-                  </Show>
-                  <Show when={envVarStatus() === "success"}>
-                    <span class="status-indicator success">✓ Updated</span>
-                  </Show>
-                  <Show when={envVarStatus() === "failed"}>
-                    <span class="status-indicator failed">✗ Failed</span>
-                  </Show>
-                </div>
-              </div>
-              <Show when={envVarError()}>
-                <div class="operation-error">
-                  <pre class="error-message-text">{envVarError()}</pre>
-                </div>
-              </Show>
-              <Show when={envVarStatus() === "failed"}>
-                <div class="operation-retry-row">
-                  <button class="retry-link" onClick={handleEnvVarUpdate}>
-                    Retry Env Vars
-                  </button>
-                </div>
-              </Show>
+            <OperationCard
+              stepNumber={6}
+              title="Update Environment Variables"
+              description="Update environment variables for Gen1 backend"
+              status={envVarStatus()}
+              onAction={handleEnvVarUpdate}
+              actionLabel="Update"
+              runningLabel="Updating..."
+              successLabel="✓ Updated"
+              failedLabel="✗ Failed"
+              error={envVarError()}
+            >
               <Show when={envVarStatus() === "success" && envVarMessage()}>
                 <div class="operation-result">
                   <h4>Environment Variable Changes</h4>
@@ -1638,7 +1353,7 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                   </div>
                 </div>
               </Show>
-            </div>
+            </OperationCard>
           </Show>
         </Show>
       </div>

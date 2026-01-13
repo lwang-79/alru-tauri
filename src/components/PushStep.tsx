@@ -17,6 +17,8 @@ import {
 import { CleanupDialog } from "./CleanupDialog";
 import "./shared.css";
 import "./PushStep.css";
+import { AmplifyJobStatus } from "./common/AmplifyJobStatus";
+import { EnvVarChangesList } from "./common/EnvVarChangesList";
 
 interface PushStepProps {
   onComplete?: () => void;
@@ -558,20 +560,6 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
     setShowBuildSpecRevertDialog(false);
   };
 
-  // Helper function to format dates with unambiguous month names
-  const formatLocalDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short", // This gives us "Jan", "Feb", "Mar", etc.
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    });
-  };
 
   const handleBack = () => {
     if (props.onBack) {
@@ -713,44 +701,7 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
 
             {/* Amplify Job Status */}
             <Show when={amplifyJob()}>
-              <div class="job-status-section">
-                <h4>Amplify Deployment Job</h4>
-                <div class="job-info">
-                  <div class="job-detail">
-                    <span class="job-label">Job ID:</span>
-                    <code class="job-value">{amplifyJob()?.job_id}</code>
-                  </div>
-                  <div class="job-detail">
-                    <span class="job-label">Status:</span>
-                    <div class="job-status-container">
-                      <span
-                        class={`job-status-badge ${amplifyJob()?.status.toLowerCase()}`}
-                      >
-                        {amplifyJob()?.status}
-                      </span>
-                      <Show when={amplifyJob()?.status === "RUNNING"}>
-                        <span class="spinner-small job-status-spinner"></span>
-                      </Show>
-                    </div>
-                  </div>
-                  <Show when={amplifyJob()?.start_time}>
-                    <div class="job-detail">
-                      <span class="job-label">Started:</span>
-                      <span class="job-value">
-                        {formatLocalDateTime(amplifyJob()!.start_time!)}
-                      </span>
-                    </div>
-                  </Show>
-                  <Show when={amplifyJob()?.end_time}>
-                    <div class="job-detail">
-                      <span class="job-label">Ended:</span>
-                      <span class="job-value">
-                        {formatLocalDateTime(amplifyJob()!.end_time!)}
-                      </span>
-                    </div>
-                  </Show>
-                </div>
-              </div>
+              <AmplifyJobStatus job={amplifyJob()!} />
             </Show>
 
             <Show when={jobCheckError() && !commitHash()}>
@@ -776,68 +727,27 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
             </Show>
 
             {/* Environment Variable Changes */}
-            <Show when={getEnvVarChanges().length > 0}>
-              <div class="env-var-changes-section">
-                <h4>Environment Variable Changes</h4>
-                <div class="env-var-changes-optimized">
-                  <For each={getEnvVarChanges()}>
-                    {(change) => (
-                      <div class="env-var-change-optimized">
-                        <div class="env-var-change-line">
-                          <span class="env-var-scope">
-                            {change.level.toUpperCase()}:
-                          </span>
-                          <code class="env-var-name">{change.key}</code>
-                          <Show when={change.old_value && change.new_value}>
-                            <span class="env-var-action">updated</span>
-                            <span class="env-var-from-to">
-                              <span class="env-var-old">
-                                {change.old_value}
-                              </span>
-                              <span class="env-var-separator">→</span>
-                              <span class="env-var-new">
-                                {change.new_value}
-                              </span>
-                            </span>
-                          </Show>
-                          <Show when={change.old_value && !change.new_value}>
-                            <span class="env-var-action removed">removed</span>
-                            <span class="env-var-old-only">
-                              was: {change.old_value}
-                            </span>
-                          </Show>
-                          <Show when={!change.old_value && change.new_value}>
-                            <span class="env-var-action added">added</span>
-                            <span class="env-var-new-only">
-                              {change.new_value}
-                            </span>
-                          </Show>
-                        </div>
-                      </div>
-                    )}
-                  </For>
-                </div>
-                <Show
-                  when={
-                    getEnvVarChanges().filter(
-                      (c) =>
-                        c.key !== "_LIVE_UPDATES" && c.key !== "_CUSTOM_IMAGE",
-                    ).length > 0
-                  }
+            <EnvVarChangesList changes={getEnvVarChanges()}>
+              <Show
+                when={
+                  getEnvVarChanges().filter(
+                    (c) =>
+                      c.key !== "_LIVE_UPDATES" && c.key !== "_CUSTOM_IMAGE",
+                  ).length > 0
+                }
+              >
+                <button
+                  class="revert-env-vars-button"
+                  onClick={() => setShowRevertDialog(true)}
                 >
-                  <button
-                    class="revert-env-vars-button"
-                    onClick={() => setShowRevertDialog(true)}
-                  >
-                    Revert Environment Variables
-                  </button>
-                  <p class="revert-note">
-                    Note: _LIVE_UPDATES and _CUSTOM_IMAGE changes cannot be
-                    reverted
-                  </p>
-                </Show>
-              </div>
-            </Show>
+                  Revert Environment Variables
+                </button>
+                <p class="revert-note">
+                  Note: _LIVE_UPDATES and _CUSTOM_IMAGE changes cannot be
+                  reverted
+                </p>
+              </Show>
+            </EnvVarChangesList>
 
             {/* Build Config Changes */}
             <Show
@@ -1037,7 +947,7 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
         </button>
         <Show when={pushStatus() === "success"}>
           <button onClick={handleFinish} class="primary-button">
-            Finish
+            Clean Up
           </button>
         </Show>
       </div>

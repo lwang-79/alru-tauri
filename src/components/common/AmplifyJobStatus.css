@@ -1,0 +1,131 @@
+/* Job Status Section */
+.job-status-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.job-status-section h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.job-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.job-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.job-label {
+    font-weight: 500;
+    color: #666;
+    min-width: 80px;
+}
+
+.job-value {
+    color: #333;
+}
+
+.job-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.job-status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.job-status-badge.running {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.job-status-badge.succeed {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.job-status-badge.failed {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.job-status-badge.cancelled {
+    background: #e2e3e5;
+    color: #41464b;
+}
+
+/* Job Status Container with Spinner */
+.job-status-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.job-status-spinner {
+    border-color: rgba(8, 66, 152, 0.3);
+    border-top-color: #084298;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .job-status-section {
+        background: #2a2a2a;
+        border-color: #444;
+    }
+
+    .job-status-section h4 {
+        color: #eee;
+    }
+
+    .job-label {
+        color: #aaa;
+    }
+
+    .job-value {
+        color: #eee;
+    }
+
+    .job-status-badge.pending {
+        background: #4a3c10;
+        color: #ffd54f;
+    }
+
+    .job-status-badge.running {
+        background: #1a3a5c;
+        color: #64b5f6;
+    }
+
+    .job-status-badge.succeed {
+        background: #1b3a24;
+        color: #81c784;
+    }
+
+    .job-status-badge.failed {
+        background: #4a1f1f;
+        color: #e57373;
+    }
+
+    .job-status-badge.cancelled {
+        background: #333;
+        color: #aaa;
+    }
+
+    .job-status-spinner {
+        border-color: rgba(92, 140, 230, 0.3);
+        border-top-color: #5c8ce6;
+    }
+}

@@ -1,0 +1,196 @@
+/* Environment Variable Changes Section - Optimized */
+.env-var-changes-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.env-var-changes-section h4 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.env-var-changes-optimized {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.env-var-change-optimized {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.env-var-change-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.env-var-scope {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    min-width: 40px;
+}
+
+.env-var-name {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 0.875rem;
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    color: #495057;
+    font-weight: 600;
+}
+
+.env-var-action {
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-transform: lowercase;
+}
+
+.env-var-action:not(.removed):not(.added) {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.env-var-action.removed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.env-var-action.added {
+    background: #d4edda;
+    color: #155724;
+}
+
+.env-var-from-to {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.env-var-old {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    text-decoration: line-through;
+}
+
+.env-var-separator {
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.env-var-new {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    background: #d4edda;
+    color: #155724;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.env-var-old-only {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.env-var-new-only {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    background: #d4edda;
+    color: #155724;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .env-var-changes-section {
+        background: #2a2a2a;
+        border-color: #444;
+    }
+
+    .env-var-changes-section h4 {
+        color: #eee;
+    }
+
+    .env-var-change-optimized {
+        background: #333;
+        border-color: #444;
+    }
+
+    .env-var-change-line {
+        color: #eee;
+    }
+
+    .env-var-scope {
+        color: #aaa;
+    }
+
+    .env-var-name {
+        background: #444;
+        color: #ddd;
+    }
+
+    .env-var-action:not(.removed):not(.added) {
+        background: #1a3a5c;
+        color: #64b5f6;
+    }
+
+    .env-var-action.removed {
+        background: #4a1f1f;
+        color: #e57373;
+    }
+
+    .env-var-action.added {
+        background: #1b3a24;
+        color: #81c784;
+    }
+
+    .env-var-old {
+        background: #4a1f1f;
+        color: #e57373;
+    }
+
+    .env-var-separator {
+        color: #aaa;
+    }
+
+    .env-var-new {
+        background: #1b3a24;
+        color: #81c784;
+    }
+
+    .env-var-old-only {
+        color: #aaa;
+    }
+
+    .env-var-new-only {
+        background: #1b3a24;
+        color: #81c784;
+    }
+}
