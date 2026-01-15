@@ -13,13 +13,40 @@ pub fn create_clean_command(program: &str) -> Command {
     // Highly aggressive environment clearing to stop pkg-packaged binaries from being misled
     // We keep only the minimum necessary for the OS and for basic user identification.
     let essentials = [
-        "PATH", "HOME", "USER", "LOGNAME", "SHELL", "LANG", "LC_ALL", "TERM", "PWD", "TMPDIR",
+        "PATH",
+        "HOME",
+        "USER",
+        "LOGNAME",
+        "SHELL",
+        "LANG",
+        "LC_ALL",
+        "TERM",
+        "PWD",
+        "TMPDIR",
+        // Windows essentials
+        "SystemRoot",
+        "SystemDrive",
+        "TEMP",
+        "TMP",
+        "USERNAME",
+        "USERPROFILE",
+        "COMPUTERNAME",
+        "COMSPEC",
+        "ProgramData",
+        "ProgramFiles",
+        "ProgramFiles(x86)",
+        "CommonProgramFiles",
+        "APPDATA",
+        "LOCALAPPDATA",
     ];
     let vars: Vec<(String, String)> = std::env::vars().collect();
 
     cmd.env_clear();
     for (key, value) in vars {
-        if essentials.contains(&key.as_str()) || key.starts_with("AWS_") || key.starts_with("LC_") {
+        if essentials.iter().any(|&e| e.eq_ignore_ascii_case(&key))
+            || key.starts_with("AWS_")
+            || key.starts_with("LC_")
+        {
             cmd.env(key, value);
         }
     }
@@ -37,9 +64,15 @@ pub fn create_clean_command(program: &str) -> Command {
 
 /// Helper to run a shell command with a clean environment.
 pub fn run_clean_sh_c(cmd_str: &str) -> io::Result<Output> {
-    let mut c = create_clean_command("sh");
-    c.arg("-c").arg(cmd_str);
-    c.output()
+    if cfg!(target_os = "windows") {
+        let mut c = create_clean_command("cmd");
+        c.arg("/C").arg(cmd_str);
+        c.output()
+    } else {
+        let mut c = create_clean_command("sh");
+        c.arg("-c").arg(cmd_str);
+        c.output()
+    }
 }
 
 /// Trait to extend std::process::Command with cleaning capabilities.
@@ -51,12 +84,36 @@ impl CommandExtClean for Command {
     fn clean_env(mut self) -> Command {
         // Aggressive environment clearing
         let essentials = [
-            "PATH", "HOME", "USER", "LOGNAME", "SHELL", "LANG", "LC_ALL", "TERM", "PWD", "TMPDIR",
+            "PATH",
+            "HOME",
+            "USER",
+            "LOGNAME",
+            "SHELL",
+            "LANG",
+            "LC_ALL",
+            "TERM",
+            "PWD",
+            "TMPDIR",
+            // Windows essentials
+            "SystemRoot",
+            "SystemDrive",
+            "TEMP",
+            "TMP",
+            "USERNAME",
+            "USERPROFILE",
+            "COMPUTERNAME",
+            "COMSPEC",
+            "ProgramData",
+            "ProgramFiles",
+            "ProgramFiles(x86)",
+            "CommonProgramFiles",
+            "APPDATA",
+            "LOCALAPPDATA",
         ];
 
         let mut vars_to_keep = Vec::new();
         for (key, value) in std::env::vars() {
-            if essentials.contains(&key.as_str())
+            if essentials.iter().any(|&e| e.eq_ignore_ascii_case(&key))
                 || key.starts_with("AWS_")
                 || key.starts_with("LC_")
             {

@@ -91,11 +91,11 @@ fn check_network() -> ToolStatus {
         {
             Ok(output) => {
                 if output.status.success() {
-                    let response = String::from_utf8_lossy(&output.stdout);
+                    let response = String::from_utf8_lossy(&output.stdout).to_uppercase();
                     if response.contains("HTTP/")
-                        && (response.contains("200")
-                            || response.contains("301")
-                            || response.contains("302"))
+                        && (response.contains(" 200")
+                            || response.contains(" 301")
+                            || response.contains(" 302"))
                     {
                         return ToolStatus::success("Connected".to_string());
                     }
@@ -105,10 +105,16 @@ fn check_network() -> ToolStatus {
         }
     }
 
-    // If curl is not available, try ping as fallback
+    // If curl is not available or fails, try ping as fallback
+    let ping_args = if cfg!(target_os = "windows") {
+        ["-n", "1", "-w", "5000", "8.8.8.8"]
+    } else {
+        ["-c", "1", "-W", "5000", "8.8.8.8"]
+    };
+
     match std::process::Command::new("ping")
         .clean_env()
-        .args(["-c", "1", "-W", "5000", "8.8.8.8"]) // Google DNS
+        .args(ping_args)
         .output()
     {
         Ok(output) => {
