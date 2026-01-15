@@ -15,8 +15,6 @@ import {
   updatePushStepContext,
 } from "../store/appStore";
 import { CleanupDialog } from "./CleanupDialog";
-import "./shared.css";
-import "./PushStep.css";
 import { AmplifyJobStatus } from "./common/AmplifyJobStatus";
 import { EnvVarChangesList } from "./common/EnvVarChangesList";
 
@@ -583,47 +581,47 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
   };
 
   return (
-    <div class="step-container wide push-step">
-      <h2>Push Changes</h2>
-      <p class="step-description">
+    <div class="max-w-[800px] mx-auto push-step">
+      <h2 class="mb-2 text-2xl font-bold">Push Changes</h2>
+      <p class="text-[#666] dark:text-[#999] mb-8">
         Review and push your changes to trigger the Amplify deployment.
       </p>
 
       {/* Summary Section */}
-      <div class="summary-balanced">
-        <h3>Changes Summary</h3>
-        <div class="summary-row-balanced">
-          <div class="summary-pair-balanced half-width">
-            <span class="summary-pair-label-balanced">App:</span>
-            <span class="summary-pair-value-balanced">
+      <div class="bg-white dark:bg-[#2a2a2a] border border-[#e0e0e0] dark:border-[#444] rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-semibold mb-4 text-[#333] dark:text-[#eee]">Changes Summary</h3>
+        <div class="flex flex-wrap gap-x-4 gap-y-3 mb-3">
+          <div class="flex-1 basis-[calc(50%-1rem)] min-w-[200px] flex items-center gap-2">
+            <span class="font-medium text-[#666] dark:text-[#aaa] min-w-[120px]">App:</span>
+            <span class="text-[#333] dark:text-[#eee]">
               {appState.amplifyResources.selectedApp?.name}
             </span>
           </div>
-          <div class="summary-pair-balanced half-width">
-            <span class="summary-pair-label-balanced">Branch:</span>
-            <span class="summary-pair-value-balanced">
+          <div class="flex-1 basis-[calc(50%-1rem)] min-w-[200px] flex items-center gap-2">
+            <span class="font-medium text-[#666] dark:text-[#aaa] min-w-[120px]">Branch:</span>
+            <span class="text-[#333] dark:text-[#eee]">
               {appState.amplifyResources.selectedBranch?.branch_name}
             </span>
           </div>
         </div>
-        <div class="summary-row-balanced">
-          <div class="summary-pair-balanced half-width">
-            <span class="summary-pair-label-balanced">Target Runtime:</span>
-            <span class="badge-balanced runtime">
+        <div class="flex flex-wrap gap-x-4 gap-y-3 mb-3">
+          <div class="flex-1 basis-[calc(50%-1rem)] min-w-[200px] flex items-center gap-2">
+            <span class="font-medium text-[#666] dark:text-[#aaa] min-w-[120px]">Target Runtime:</span>
+            <span class="px-3 py-1 bg-[#e0f2f1] text-[#00796b] dark:bg-[#1a2e2c] dark:text-[#4db6ac] rounded-md text-sm font-semibold font-mono">
               {appState.runtimeInfo.targetRuntime}
             </span>
           </div>
-          <div class="summary-pair-balanced half-width">
-            <span class="summary-pair-label-balanced">Backend Type:</span>
-            <span class="badge-balanced type">
+          <div class="flex-1 basis-[calc(50%-1rem)] min-w-[200px] flex items-center gap-2">
+            <span class="font-medium text-[#666] dark:text-[#aaa] min-w-[120px]">Backend Type:</span>
+            <span class="px-3 py-1 bg-[#e3f2fd] text-[#1976d2] dark:bg-[#1a2a3a] dark:text-[#64b5f6] rounded-md text-sm font-semibold">
               {appState.repository.backendType === "Gen2" ? "Gen 2" : "Gen 1"}
             </span>
           </div>
         </div>
-        <div class="summary-row-balanced">
-          <div class="summary-pair-balanced full-width">
-            <span class="summary-pair-label-balanced">Files Modified:</span>
-            <span class="summary-pair-value-balanced">
+        <div class="flex flex-wrap gap-x-4 gap-y-3">
+          <div class="w-full flex items-center gap-2">
+            <span class="font-medium text-[#666] dark:text-[#aaa] min-w-[120px]">Files Modified:</span>
+            <span class="text-[#333] dark:text-[#eee]">
               {appState.repository.changes.length > 0
                 ? `${appState.repository.changes.length} file(s)`
                 : "No manual changes (updated via package upgrade)"}
@@ -633,39 +631,39 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
       </div>
 
       {/* Push Action Section */}
-      <div class="push-action-section">
+      <div class="bg-white dark:bg-[#2a2a2a] border border-[#e0e0e0] dark:border-[#444] rounded-lg p-8 mb-8 min-h-[300px] flex items-center justify-center">
         <Show when={pushStatus() === "pending"}>
-          <div class="push-ready">
-            <div class="ready-icon">✓</div>
-            <h3>Ready to Push</h3>
-            <p>
+          <div class="text-center max-w-[500px]">
+            <div class="w-16 h-16 rounded-full bg-[#4caf50] text-white text-2xl flex items-center justify-center mx-auto mb-6">✓</div>
+            <h3 class="m-0 mb-4 text-xl font-semibold text-[#333] dark:text-[#eee]">Ready to Push</h3>
+            <p class="text-[#666] dark:text-[#aaa] leading-relaxed mb-8">
               Your changes are ready to be committed and pushed to the remote
               repository. This will trigger an Amplify deployment with the
               updated runtime configuration.
             </p>
-            <button class="push-button" onClick={handleInitiatePush}>
+            <button class="bg-[#4caf50] text-white border-none px-8 py-3.5 rounded-md text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[#45a049] shadow-md hover:shadow-lg active:transform active:scale-95" onClick={handleInitiatePush}>
               Push Changes
             </button>
           </div>
         </Show>
 
         <Show when={pushStatus() === "confirming"}>
-          <div class="confirmation-dialog">
-            <div class="confirmation-icon">⚠️</div>
-            <h3>Confirm Push</h3>
-            <p>
+          <div class="text-center max-w-[500px]">
+            <div class="w-16 h-16 rounded-full bg-[#ff9800] text-white text-2xl flex items-center justify-center mx-auto mb-6">⚠️</div>
+            <h3 class="m-0 mb-4 text-xl font-semibold text-[#333] dark:text-[#eee]">Confirm Push</h3>
+            <p class="text-[#666] dark:text-[#aaa] leading-relaxed mb-8">
               Are you sure you want to push these changes? This will commit and
               push to the{" "}
-              <strong>
+              <strong class="text-[#333] dark:text-[#eee] font-bold">
                 {appState.amplifyResources.selectedBranch?.branch_name}
               </strong>{" "}
               branch and trigger an Amplify deployment.
             </p>
-            <div class="confirmation-actions">
-              <button class="cancel-button" onClick={handleCancelPush}>
+            <div class="flex justify-center gap-4">
+              <button class="bg-transparent text-[#666] dark:text-[#aaa] border border-[#ccc] dark:border-[#555] px-6 py-3 rounded-md font-semibold cursor-pointer transition-all duration-200 hover:bg-[#f5f5f5] dark:hover:bg-[#333]" onClick={handleCancelPush}>
                 Cancel
               </button>
-              <button class="confirm-button" onClick={handleConfirmPush}>
+              <button class="bg-[#4caf50] text-white border-none px-6 py-3 rounded-md font-semibold cursor-pointer transition-all duration-200 hover:bg-[#45a049]" onClick={handleConfirmPush}>
                 Confirm & Push
               </button>
             </div>
@@ -673,29 +671,29 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
         </Show>
 
         <Show when={pushStatus() === "running"}>
-          <div class="push-progress">
-            <span class="spinner"></span>
-            <h3>Pushing Changes...</h3>
-            <p>Committing and pushing to remote repository</p>
+          <div class="text-center max-w-[500px]">
+            <span class="w-10 h-10 border-4 border-[#e0e0e0] border-t-[#396cd8] rounded-full animate-spin inline-block mb-4"></span>
+            <h3 class="m-0 mb-2 text-xl font-semibold text-[#333] dark:text-[#eee]">Pushing Changes...</h3>
+            <p class="text-[#666] dark:text-[#aaa] m-0">Committing and pushing to remote repository</p>
           </div>
         </Show>
 
         <Show when={pushStatus() === "success"}>
           <div
-            class={`push-result ${commitHash() ? "push-success" : "push-warning"}`}
+            class={`text-center p-8 rounded-lg border transition-all duration-200 w-full ${commitHash() ? "bg-[#f0f8f0] border-[#4caf50] dark:bg-[#1a2a1a]" : "bg-[#fff8f0] border-[#f57c00] dark:bg-[#3a2a1a]"}`}
           >
             <Show when={commitHash()}>
-              <div class="success-icon">✓</div>
-              <h3>Successfully Pushed!</h3>
+              <div class="w-16 h-16 rounded-full bg-[#4caf50] text-white text-2xl flex items-center justify-center mx-auto mb-6">✓</div>
+              <h3 class="text-[#15803d] dark:text-[#66bb6a] text-xl font-semibold m-4">Successfully Pushed!</h3>
             </Show>
             <Show when={!commitHash()}>
-              <div class="warning-icon">⚠️</div>
-              <h3>Push Skipped</h3>
+              <div class="w-16 h-16 rounded-full bg-[#f57c00] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6">⚠️</div>
+              <h3 class="text-[#e65100] dark:text-[#ffb74d] text-xl font-semibold m-4">Push Skipped</h3>
             </Show>
             <Show when={commitHash()}>
-              <div class="commit-info">
-                <span class="commit-label">Commit:</span>
-                <code class="commit-hash">{commitHash()}</code>
+              <div class="flex items-center justify-center gap-2 mb-6 p-3 bg-white/50 dark:bg-[#333]/50 rounded-md border border-black/5 dark:border-white/5">
+                <span class="text-[0.85rem] text-[#666] dark:text-[#aaa] font-medium">Commit:</span>
+                <code class="font-mono text-[0.85rem] bg-[#e0e0e0] dark:bg-[#444] px-2 py-1 rounded text-[#333] dark:text-[#eee]">{commitHash()}</code>
               </div>
             </Show>
 
@@ -705,10 +703,10 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
             </Show>
 
             <Show when={jobCheckError() && !commitHash()}>
-              <div class="job-check-info">
-                <p class="info-message">
+              <div class="mt-4 text-[#0066cc] dark:text-[#7dd3fc]">
+                <p class="flex items-center justify-center gap-2 text-sm italic">
                   <Show when={checkingForJob()}>
-                    <span class="spinner-small"></span>
+                    <span class="w-3 h-3 border-2 border-[#e0f2fe] border-t-[#0ea5e9] rounded-full animate-spin"></span>
                   </Show>
                   {jobCheckError()}
                 </p>
@@ -716,10 +714,10 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
             </Show>
 
             <Show when={jobCheckError() && commitHash()}>
-              <div class="job-check-error">
-                <p class="error-hint">
+              <div class="mt-4 text-[#f57c00] dark:text-[#ffb74d]">
+                <p class="flex items-center justify-center gap-2 text-sm italic">
                   <Show when={checkingForJob()}>
-                    <span class="spinner-small"></span>
+                    <span class="w-3 h-3 border-2 border-[#fff7ed] border-t-[#f97316] rounded-full animate-spin"></span>
                   </Show>
                   {jobCheckError()}
                 </p>
@@ -736,16 +734,18 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
                   ).length > 0
                 }
               >
-                <button
-                  class="revert-env-vars-button"
-                  onClick={() => setShowRevertDialog(true)}
-                >
-                  Revert Environment Variables
-                </button>
-                <p class="revert-note">
-                  Note: _LIVE_UPDATES and _CUSTOM_IMAGE changes cannot be
-                  reverted
-                </p>
+                <div class="mt-4">
+                  <button
+                    class="px-4 py-2 bg-[#ffc107] text-[#212529] border-none rounded-md text-[0.875rem] font-medium cursor-pointer transition-all duration-200 hover:bg-[#e0a800] hover:-translate-y-0.5"
+                    onClick={() => setShowRevertDialog(true)}
+                  >
+                    Revert Environment Variables
+                  </button>
+                  <p class="mt-2 text-[0.75rem] text-[#6c757d] dark:text-[#aaa] italic">
+                    Note: _LIVE_UPDATES and _CUSTOM_IMAGE changes cannot be
+                    reverted
+                  </p>
+                </div>
               </Show>
             </EnvVarChangesList>
 
@@ -756,55 +756,56 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
                 appState.repository.buildConfigChange.location === "Cloud"
               }
             >
-              <div class="build-config-change-section">
-                <h4>Build Configuration Changes</h4>
-                <div class="build-config-change-item">
-                  <div class="build-config-change-header">
-                    <span class="build-config-label">Location:</span>
-                    <span class="build-config-value">
+              <div class="mt-6 p-4 bg-[#f8f9fa] dark:bg-[#333] rounded-lg border border-[#e9ecef] dark:border-[#444] text-left">
+                <h4 class="m-0 mb-4 text-[#495057] dark:text-[#eee] text-base font-semibold">Build Configuration Changes</h4>
+                <div class="p-3 bg-white dark:bg-[#444] rounded-md border border-[#dee2e6] dark:border-[#555] mb-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="font-medium text-[#6c757d] dark:text-[#aaa] text-[0.875rem]">Location:</span>
+                    <span class="text-[#495057] dark:text-[#eee] text-[0.875rem]">
                       Cloud (AWS Amplify buildSpec)
                     </span>
                   </div>
-                  <div class="build-config-change-values">
-                    <div class="build-config-old">
-                      <span class="build-config-label">Old Command:</span>
-                      <code class="build-config-command">
+                  <div class="flex flex-col gap-2">
+                    <div class="flex flex-col gap-1">
+                      <span class="font-medium text-[#6c757d] dark:text-[#aaa] text-[0.875rem]">Old Command:</span>
+                      <code class="font-mono text-[0.8rem] p-2 rounded block break-all bg-[#f8d7da] text-[#721c24] border border-[#f5c6cb] dark:bg-[#4a1f1f] dark:text-[#e57373] dark:border-[#4a1f1f]">
                         {appState.repository.buildConfigChange?.old_command}
                       </code>
                     </div>
-                    <span class="build-config-arrow">→</span>
-                    <div class="build-config-new">
-                      <span class="build-config-label">New Command:</span>
-                      <code class="build-config-command">
+                    <span class="text-[#6c757d] dark:text-[#aaa] font-bold text-center my-1 select-none">↓</span>
+                    <div class="flex flex-col gap-1">
+                      <span class="font-medium text-[#6c757d] dark:text-[#aaa] text-[0.875rem]">New Command:</span>
+                      <code class="font-mono text-[0.8rem] p-2 rounded block break-all bg-[#d4edda] text-[#155724] border border-[#c3e6cb] dark:bg-[#1b3a24] dark:text-[#81c784] dark:border-[#1b3a24]">
                         {appState.repository.buildConfigChange?.new_command}
                       </code>
                     </div>
                   </div>
                 </div>
                 <button
-                  class="revert-build-spec-button"
+                  class="px-4 py-2 bg-[#ffc107] text-[#212529] border-none rounded-md text-[0.875rem] font-medium cursor-pointer transition-all duration-200 hover:bg-[#e0a800] hover:-translate-y-0.5"
                   onClick={() => setShowBuildSpecRevertDialog(true)}
                 >
                   Revert Build Configuration
                 </button>
-                <p class="revert-note">
+                <p class="mt-2 text-[0.75rem] text-[#6c757d] dark:text-[#aaa] italic">
                   This will restore the original buildSpec in AWS Amplify
                 </p>
               </div>
             </Show>
 
             <Show when={commitHash()}>
-              <div class="success-message">
-                <p>
-                  <strong>Next Steps:</strong>
+              <div class="mt-6 p-4 bg-[#e8f5e9] dark:bg-[#1a2e1a] rounded-lg text-left">
+                <p class="m-0 mb-3 font-semibold text-[#2e7d32] dark:text-[#66bb6a]">
+                  Next Steps:
                 </p>
-                <ul>
-                  <li>
+                <ul class="m-0 pl-6 text-[#666] dark:text-[#aaa] leading-relaxed list-disc">
+                  <li class="mb-2">
                     Monitor the deployment in the{" "}
                     <a
                       href={`https://${appState.awsConfig.selectedRegion}.console.aws.amazon.com/amplify/apps/${appState.amplifyResources.selectedApp?.app_id}/branches/${appState.amplifyResources.selectedBranch?.branch_name}/deployments`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      class="text-[#396cd8] dark:text-[#5c8ce6] font-medium hover:underline"
                     >
                       AWS Amplify Console
                     </a>
@@ -818,30 +819,30 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
             </Show>
 
             <Show when={!commitHash()}>
-              <div class="success-message">
+              <div class="mt-6 p-4 bg-[#e8f5e9] dark:bg-[#1a2e1a] rounded-lg text-left">
                 {/* Show "What happened" only if no job is being tracked */}
                 <Show when={!amplifyJob()}>
-                  <p>
-                    <strong>What happened:</strong>
+                  <p class="m-0 mb-3 font-semibold text-[#2e7d32] dark:text-[#66bb6a]">
+                    What happened:
                   </p>
-                  <ul>
-                    <li>All runtime configurations were already up to date</li>
-                    <li>Environment variables were updated as needed</li>
+                  <ul class="m-0 pl-6 text-[#666] dark:text-[#aaa] leading-relaxed list-disc">
+                    <li class="mb-1">All runtime configurations were already up to date</li>
+                    <li class="mb-1">Environment variables were updated as needed</li>
                     <li>
                       No file changes were required, so no commit was created
                     </li>
                   </ul>
                   <Show when={lastFailedJob()}>
                     <Show when={lastFailedJob()?.status === "FAILED"}>
-                      <div class="failed-job-notice">
-                        <p class="failed-job-text">
-                          <strong>Note:</strong> The last deployment job (ID:{" "}
+                      <div class="mt-4 p-4 bg-[#fff3cd] dark:bg-[#3a2e1a] border border-[#ffc107] dark:border-[#f57c00] rounded-lg">
+                        <p class="m-0 mb-3 text-[#856404] dark:text-[#ffb74d] text-sm leading-relaxed">
+                          <strong class="font-bold">Note:</strong> The last deployment job (ID:{" "}
                           {lastFailedJob()?.job_id}) failed. This might be why
                           your Lambda functions haven't been updated yet.
                         </p>
-                        <div class="failed-job-actions">
+                        <div class="flex flex-wrap gap-3">
                           <button
-                            class="retry-job-button"
+                            class="px-4 py-2 bg-[#ff9800] text-white border-none rounded-md text-sm font-medium cursor-pointer transition-all duration-200 hover:bg-[#f57c00] disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
                             onClick={handleRetryJob}
                             disabled={retryingJob()}
                           >
@@ -853,7 +854,7 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
                             href={`https://${appState.awsConfig.selectedRegion}.console.aws.amazon.com/amplify/apps/${appState.amplifyResources.selectedApp?.app_id}/branches/${appState.amplifyResources.selectedBranch?.branch_name}/deployments`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="console-link-button"
+                            class="px-4 py-2 bg-[#396cd8] text-white rounded-md text-sm font-medium transition-all duration-200 hover:bg-[#2563eb] shadow-sm"
                           >
                             View in AWS Console
                           </a>
@@ -861,9 +862,9 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
                       </div>
                     </Show>
                     <Show when={lastFailedJob()?.status === "SUCCEED"}>
-                      <div class="failed-job-notice">
-                        <p class="failed-job-text">
-                          <strong>Note:</strong> The last deployment job (ID:{" "}
+                      <div class="mt-4 p-4 bg-[#fff3cd] dark:bg-[#3a2e1a] border border-[#ffc107] dark:border-[#f57c00] rounded-lg text-left">
+                        <p class="m-0 mb-3 text-[#856404] dark:text-[#ffb74d] text-sm leading-relaxed">
+                          <strong class="font-bold">Note:</strong> The last deployment job (ID:{" "}
                           {lastFailedJob()?.job_id}) succeeded, but your Lambda
                           functions might have been updated outside of Amplify
                           after that deployment. You can trigger a new
@@ -871,7 +872,7 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
                           applied.
                         </p>
                         <button
-                          class="retry-job-button"
+                          class="px-4 py-2 bg-[#ff9800] text-white border-none rounded-md text-sm font-medium cursor-pointer transition-all duration-200 hover:bg-[#f57c00] disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
                           onClick={handleRetryJob}
                           disabled={retryingJob()}
                         >
@@ -883,7 +884,7 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
                     </Show>
                   </Show>
                   <Show when={!lastFailedJob()}>
-                    <p class="no-deployment-note">
+                    <p class="mt-4 p-3 bg-[#e7f3ff] dark:bg-[#1a2a3a] border border-[#b3d9ff] dark:border-[#396cd8] rounded-md text-[#0066cc] dark:text-[#7dd3fc] text-sm italic">
                       Since no code changes were made, your Lambda functions
                       should already be using the correct runtime versions.
                     </p>
@@ -892,16 +893,17 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
 
                 {/* Show "Next Steps" if a job is being tracked (after retry) */}
                 <Show when={amplifyJob()}>
-                  <p>
-                    <strong>Next Steps:</strong>
+                  <p class="m-0 mb-3 font-semibold text-[#2e7d32] dark:text-[#66bb6a]">
+                    Next Steps:
                   </p>
-                  <ul>
-                    <li>
+                  <ul class="m-0 pl-6 text-[#666] dark:text-[#aaa] leading-relaxed list-disc">
+                    <li class="mb-2">
                       Monitor the deployment in the{" "}
                       <a
                         href={`https://${appState.awsConfig.selectedRegion}.console.aws.amazon.com/amplify/apps/${appState.amplifyResources.selectedApp?.app_id}/branches/${appState.amplifyResources.selectedBranch?.branch_name}/deployments`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        class="text-[#396cd8] dark:text-[#5c8ce6] font-medium hover:underline"
                       >
                         AWS Amplify Console
                       </a>
@@ -918,18 +920,18 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
         </Show>
 
         <Show when={pushStatus() === "failed"}>
-          <div class="push-error">
-            <div class="error-icon">✗</div>
-            <h3>Push Failed</h3>
-            <div class="error-details">
-              <pre class="error-message">{pushError()}</pre>
+          <div class="text-center max-w-[600px]">
+            <div class="w-16 h-16 rounded-full bg-[#f44336] text-white text-2xl flex items-center justify-center mx-auto mb-6">✗</div>
+            <h3 class="m-0 mb-4 text-[#c62828] dark:text-[#ef5350] text-xl font-semibold">Push Failed</h3>
+            <div class="bg-[#ffebee] dark:bg-[#3a1a1a] p-4 rounded-lg text-left mb-4 overflow-hidden">
+              <pre class="m-0 font-mono text-[0.85rem] text-[#c62828] dark:text-[#ff6b6b] whitespace-pre-wrap break-words">{pushError()}</pre>
             </div>
-            <p class="error-hint">
+            <p class="text-[#666] dark:text-[#aaa] text-[0.9rem] leading-relaxed mb-6">
               Common issues: authentication problems, network errors, or
               conflicts with remote branch. Ensure you have push access to the
               repository.
             </p>
-            <button class="retry-button" onClick={handleInitiatePush}>
+            <button class="bg-[#396cd8] text-white border-none px-6 py-2.5 rounded-md text-[0.95rem] font-medium cursor-pointer transition-all duration-200 hover:bg-[#2563eb]" onClick={handleInitiatePush}>
               Retry Push
             </button>
           </div>
@@ -937,16 +939,16 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
       </div>
 
       {/* Actions */}
-      <div class="actions">
+      <div class="flex justify-end gap-3 mt-8">
         <button
           onClick={handleBack}
-          class="secondary-button"
+          class="bg-transparent text-[#396cd8] border border-[#396cd8] px-6 py-2.5 rounded-md font-medium cursor-pointer transition-all duration-200 hover:bg-[#396cd8] hover:text-white disabled:opacity-60 disabled:cursor-not-allowed"
           disabled={pushStatus() === "running"}
         >
           Back
         </button>
         <Show when={pushStatus() === "success"}>
-          <button onClick={handleFinish} class="primary-button">
+          <button onClick={handleFinish} class="bg-[#396cd8] text-white border-none px-6 py-2.5 rounded-md font-medium cursor-pointer transition-all duration-200 hover:bg-[#2563eb]">
             Clean Up
           </button>
         </Show>
@@ -954,39 +956,39 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
 
       {/* Revert Confirmation Dialog */}
       <Show when={showRevertDialog()}>
-        <div class="revert-dialog-overlay">
-          <div class="revert-dialog">
-            <h3>Revert Environment Variables</h3>
-            <p>
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
+          <div class="bg-white dark:bg-[#2a2a2a] rounded-xl p-6 max-w-[500px] w-[90%] max-h-[80vh] overflow-y-auto shadow-2xl">
+            <h3 class="m-0 mb-4 text-[#495057] dark:text-[#eee] text-xl font-semibold">Revert Environment Variables</h3>
+            <p class="m-0 mb-4 text-[#6c757d] dark:text-[#aaa] leading-relaxed">
               Are you sure you want to revert the environment variable changes?
               This will restore the original values.
             </p>
-            <div class="revert-changes-list">
+            <div class="flex flex-col gap-2 mb-6 max-h-[200px] overflow-y-auto pr-1">
               <For
                 each={getEnvVarChanges().filter(
                   (c) => c.key !== "_LIVE_UPDATES" && c.key !== "_CUSTOM_IMAGE",
                 )}
               >
                 {(change) => (
-                  <div class="revert-change-item">
-                    <span class="revert-level-badge">{change.level}</span>
-                    <code class="revert-key">{change.key}</code>
-                    <span class="revert-arrow">←</span>
-                    <span class="revert-value">{change.old_value}</span>
+                  <div class="flex items-center gap-2 p-2 bg-[#f8f9fa] dark:bg-[#333] rounded-md text-[0.875rem]">
+                    <span class="px-2 py-0.5 bg-[#6c757d] text-white rounded text-[0.75rem] font-medium uppercase">{change.level}</span>
+                    <code class="font-mono bg-white dark:bg-[#444] px-1.5 py-0.5 rounded text-[#495057] dark:text-[#ddd]">{change.key}</code>
+                    <span class="text-[#ffc107] font-bold">←</span>
+                    <span class="text-[#28a745] dark:text-[#81c784] font-mono bg-[#d4edda] dark:bg-[#1b3a24] px-1.5 py-0.5 rounded">{change.old_value}</span>
                   </div>
                 )}
               </For>
             </div>
-            <div class="revert-dialog-actions">
+            <div class="flex justify-end gap-3">
               <button
-                class="cancel-revert-button"
+                class="px-4 py-2 bg-[#6c757d] text-white border-none rounded-md text-sm cursor-pointer transition-all duration-200 hover:bg-[#5a6268] disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleCancelRevert}
                 disabled={revertInProgress()}
               >
                 Cancel
               </button>
               <button
-                class="confirm-revert-button"
+                class="px-4 py-2 bg-[#ffc107] text-[#212529] border-none rounded-md text-sm font-medium cursor-pointer transition-all duration-200 hover:bg-[#e0a800] disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleRevertEnvVars}
                 disabled={revertInProgress()}
               >
@@ -999,35 +1001,35 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
 
       {/* Build Spec Revert Confirmation Dialog */}
       <Show when={showBuildSpecRevertDialog()}>
-        <div class="revert-dialog-overlay">
-          <div class="revert-dialog">
-            <h3>Revert Build Configuration</h3>
-            <p>
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
+          <div class="bg-white dark:bg-[#2a2a2a] rounded-xl p-6 max-w-[500px] w-[90%] max-h-[80vh] overflow-y-auto shadow-2xl">
+            <h3 class="m-0 mb-4 text-[#495057] dark:text-[#eee] text-xl font-semibold">Revert Build Configuration</h3>
+            <p class="m-0 mb-4 text-[#6c757d] dark:text-[#aaa] leading-relaxed">
               Are you sure you want to revert the build configuration changes?
               This will restore the original buildSpec in AWS Amplify.
             </p>
-            <div class="revert-changes-list">
+            <div class="flex flex-col gap-2 mb-6">
               <Show when={appState.repository.buildConfigChange}>
-                <div class="revert-change-item">
-                  <span class="revert-level-badge">cloud</span>
-                  <code class="revert-key">Build Command</code>
-                  <span class="revert-arrow">←</span>
-                  <span class="revert-value">
+                <div class="flex items-center gap-2 p-2 bg-[#f8f9fa] dark:bg-[#333] rounded-md text-[0.875rem]">
+                  <span class="px-2 py-0.5 bg-[#6c757d] text-white rounded text-[0.75rem] font-medium uppercase">cloud</span>
+                  <code class="font-mono bg-white dark:bg-[#444] px-1.5 py-0.5 rounded text-[#495057] dark:text-[#ddd]">Build Command</code>
+                  <span class="text-[#ffc107] font-bold">←</span>
+                  <span class="text-[#28a745] dark:text-[#81c784] font-mono bg-[#d4edda] dark:bg-[#1b3a24] px-1.5 py-0.5 rounded">
                     {appState.repository.buildConfigChange?.old_command}
                   </span>
                 </div>
               </Show>
             </div>
-            <div class="revert-dialog-actions">
+            <div class="flex justify-end gap-3">
               <button
-                class="cancel-revert-button"
+                class="px-4 py-2 bg-[#6c757d] text-white border-none rounded-md text-sm cursor-pointer transition-all duration-200 hover:bg-[#5a6268] disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleCancelBuildSpecRevert}
                 disabled={revertBuildSpecInProgress()}
               >
                 Cancel
               </button>
               <button
-                class="confirm-revert-button"
+                class="px-4 py-2 bg-[#ffc107] text-[#212529] border-none rounded-md text-sm font-medium cursor-pointer transition-all duration-200 hover:bg-[#e0a800] disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleRevertBuildSpec}
                 disabled={revertBuildSpecInProgress()}
               >

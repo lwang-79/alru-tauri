@@ -15,9 +15,6 @@ import type {
   BuildConfigUpdateResult,
 } from "../types";
 import { appState, setAppState } from "../store/appStore";
-import "./shared.css";
-import "./shared.css";
-import "./CloneUpdateStep.css";
 import { LogViewer } from "./common/LogViewer";
 import { OperationCard } from "./common/OperationCard";
 
@@ -888,41 +885,39 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
   };
 
   return (
-    <div class="step-container wide clone-update-step">
-      <h2>Clone & Update</h2>
-      <p class="step-description">
+    <div class="max-w-[800px] mx-auto opacity-1 animate-[fadeIn_0.1s_ease-in] clone-update-step">
+      <h2 class="text-2xl font-bold text-[#333] dark:text-[#eee] mb-2 text-center">Clone & Update</h2>
+      <p class="text-[#666] dark:text-[#aaa] mb-8 text-center leading-relaxed max-w-[600px] mx-auto">
         Clone the repository, detect project configuration, and update runtime
         settings.
       </p>
 
       {/* Selected App/Branch Summary */}
-      <div class="info-bar-balanced">
-        <div class="info-bar-left-balanced">
-          <div class="info-item-balanced">
-            <span class="info-label-balanced">App:</span>
-            <span class="info-value-balanced">
+      <div class="bg-white dark:bg-[#2a2a2a] rounded-xl p-5 border border-[#eee] dark:border-[#444] shadow-sm mb-8 flex flex-wrap gap-8 items-center justify-between">
+        <div class="flex flex-wrap gap-8">
+          <div class="flex flex-col">
+            <span class="text-[0.7rem] font-bold text-[#999] dark:text-[#666] uppercase tracking-wider">App</span>
+            <span class="text-[0.95rem] font-semibold text-[#333] dark:text-[#eee]">
               {appState.amplifyResources.selectedApp?.name}
             </span>
           </div>
-          <div class="info-item-balanced">
-            <span class="info-label-balanced">Branch:</span>
-            <span class="info-value-balanced">
+          <div class="flex flex-col">
+            <span class="text-[0.7rem] font-bold text-[#999] dark:text-[#666] uppercase tracking-wider">Branch</span>
+            <span class="text-[0.95rem] font-semibold text-[#333] dark:text-[#eee]">
               {appState.amplifyResources.selectedBranch?.branch_name}
             </span>
           </div>
         </div>
-        <div class="info-bar-right-balanced">
-          <div class="info-item-balanced">
-            <span class="info-label-balanced">Target Runtime:</span>
-            <span class="badge-balanced runtime">
-              {appState.runtimeInfo.targetRuntime}
-            </span>
-          </div>
+        <div class="flex flex-col items-end">
+          <span class="text-[0.7rem] font-bold text-[#999] dark:text-[#666] uppercase tracking-wider">Target Runtime</span>
+          <span class="px-3 py-0.5 bg-[#e3f2fd] dark:bg-[#1a3a5c] text-[#1976d2] dark:text-[#64b5f6] rounded-full text-[0.8rem] font-bold border border-[#bbdefb] dark:border-[#1a3a5c]">
+            {appState.runtimeInfo.targetRuntime}
+          </span>
         </div>
       </div>
 
       {/* Operations */}
-      <div class="operations-container">
+      <div class="flex flex-col gap-4">
         {/* Step 1: Clone Repository & Detect Configuration */}
         {/* Step 1: Clone Repository & Detect Configuration */}
         <OperationCard
@@ -943,73 +938,69 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
           <Show
             when={cloneStatus() === "success" && appState.repository.clonePath}
           >
-            <div class="result-balanced">
-              <h4>Repository Details</h4>
-              <div class="result-row-balanced">
-                <div class="result-item-balanced half-width">
-                  <span class="result-item-label-balanced">
-                    Package Manager:
-                  </span>
-                  <span class="badge-balanced type">
+            <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+              <h4 class="text-[0.9rem] font-bold text-[#555] dark:text-[#ccc] mb-4 uppercase tracking-tight">Repository Details</h4>
+              <div class="flex flex-wrap gap-x-8 gap-y-4 mb-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-[0.85rem] text-[#666] dark:text-[#aaa]">Package Manager:</span>
+                  <span class="px-2 py-0.5 bg-[#f5f5f5] dark:bg-[#333] text-[#333] dark:text-[#eee] rounded text-[0.75rem] font-bold border border-[#ddd] dark:border-[#555]">
                     {getPackageManagerDisplay(
                       appState.repository.packageManager,
                     )}
                   </span>
                 </div>
-                <div class="result-item-balanced half-width">
-                  <span class="result-item-label-balanced">Backend Type:</span>
-                  <span class="badge-balanced type">
+                <div class="flex items-center gap-2">
+                  <span class="text-[0.85rem] text-[#666] dark:text-[#aaa]">Backend Type:</span>
+                  <span class="px-2 py-0.5 bg-[#f5f5f5] dark:bg-[#333] text-[#333] dark:text-[#eee] rounded text-[0.75rem] font-bold border border-[#ddd] dark:border-[#555]">
                     {getBackendTypeDisplay(appState.repository.backendType)}
                   </span>
                 </div>
               </div>
-              <div class="result-row-balanced">
-                <div class="result-item-balanced full-width">
-                  <span class="result-item-label-balanced">Path:</span>
-                  <code class="result-item-value-balanced">
-                    {appState.repository.clonePath}
-                  </code>
-                  <button
-                    class="copy-button"
-                    onClick={copyPathToClipboard}
-                    title={pathCopied() ? "Copied!" : "Copy path"}
-                  >
-                    <Show
-                      when={pathCopied()}
-                      fallback={
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        >
-                          <rect
-                            x="9"
-                            y="9"
-                            width="13"
-                            height="13"
-                            rx="2"
-                            ry="2"
-                          ></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                      }
-                    >
+              <div class="flex items-center gap-2 bg-[#fafafa] dark:bg-[#222] p-2 rounded-lg border border-[#f0f0f0] dark:border-[#333]">
+                <span class="text-[0.8rem] text-[#999] dark:text-[#666] font-mono shrink-0 ml-1 leading-none uppercase tracking-tighter">Path:</span>
+                <code class="text-[0.85rem] text-[#444] dark:text-[#ccc] px-2 py-0.5 rounded break-all grow truncate">
+                  {appState.repository.clonePath}
+                </code>
+                <button
+                  class="flex items-center justify-center w-8 h-8 shrink-0 p-0 border border-[#ddd] dark:border-[#555] rounded-md bg-white dark:bg-[#444] text-[#666] dark:text-[#aaa] cursor-pointer transition-all duration-200 hover:bg-[#f5f5f5] dark:hover:bg-[#333] hover:text-[#333] dark:hover:text-white shadow-sm"
+                  onClick={copyPathToClipboard}
+                  title={pathCopied() ? "Copied!" : "Copy path"}
+                >
+                  <Show
+                    when={pathCopied()}
+                    fallback={
                       <svg
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        stroke-width="2.5"
                       >
-                        <polyline points="20 6 9 17 4 12"></polyline>
+                        <rect
+                          x="9"
+                          y="9"
+                          width="13"
+                          height="13"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                       </svg>
-                    </Show>
-                  </button>
-                </div>
+                    }
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </Show>
+                </button>
               </div>
             </div>
           </Show>
@@ -1046,8 +1037,13 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               />
             </Show>
             <Show when={prepareStatus() === "success" && upgradeMessage()}>
-              <div class="operation-result">
-                <p class="upgrade-message">{upgradeMessage()}</p>
+              <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+                <div class="bg-[#f0f9ff] dark:bg-[#07253d] border border-[#bae6fd] dark:border-[#1e3a8a] rounded-lg p-3 flex items-start gap-3 text-blue-800 dark:text-blue-300">
+                  <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p class="m-0 text-[0.85rem] leading-relaxed">{upgradeMessage()}</p>
+                </div>
               </div>
             </Show>
           </OperationCard>
@@ -1073,20 +1069,28 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                 appState.repository.changes.length > 0
               }
             >
-              <div class="operation-result">
-                <h4>Changes Made:</h4>
-                <div class="changes-list">
+              <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+                <h4 class="text-[0.9rem] font-bold text-[#555] dark:text-[#ccc] mb-3 uppercase tracking-tight">Changes Applied</h4>
+                <div class="flex flex-col gap-3">
                   <For each={appState.repository.changes}>
                     {(change: FileChange) => (
-                      <div class="change-item">
-                        <span class="change-type">
-                          {getChangeTypeDisplay(change.change_type)}
-                        </span>
-                        <code class="change-path">{change.path}</code>
-                        <div class="change-details">
-                          <span class="old-value">{change.old_value}</span>
-                          <span class="arrow">→</span>
-                          <span class="new-value">{change.new_value}</span>
+                      <div class="bg-[#fafafa] dark:bg-[#333] rounded-lg p-3 border border-[#f0f0f0] dark:border-[#444] shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                          <span class="px-2 py-0.5 bg-[#e3f2fd] dark:bg-[#1a3a5c] text-[#1976d2] dark:text-[#64b5f6] rounded text-[0.65rem] font-bold uppercase tracking-wide whitespace-nowrap">
+                            {getChangeTypeDisplay(change.change_type)}
+                          </span>
+                          <code class="text-[0.8rem] text-[#666] dark:text-[#aaa] truncate italic grow">
+                            {change.path.split("/").pop()}
+                          </code>
+                        </div>
+                        <div class="flex items-center gap-2 text-[0.85rem] bg-white dark:bg-[#222] p-2 rounded border border-[#f0f0f0] dark:border-[#111]">
+                          <span class="text-[#f44336] dark:text-[#ef5350] line-through font-mono opacity-60 text-[0.8rem]">{change.old_value}</span>
+                          <span class="text-[#999] dark:text-[#666]">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                          </span>
+                          <span class="text-[#4caf50] dark:text-[#81c784] font-bold font-mono text-[0.85rem]">{change.new_value}</span>
                         </div>
                       </div>
                     )}
@@ -1100,10 +1104,9 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                 appState.repository.changes.length === 0
               }
             >
-              <div class="operation-result">
-                <p class="no-changes">
-                  No outdated runtimes are manually configured. Runtimes will be
-                  updated by upgrading to latest amplify backend version.
+              <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+                <p class="m-0 text-[#666] dark:text-[#aaa] italic text-[0.85rem] text-center py-6 bg-[#f8f9fa] dark:bg-[#222] rounded-lg border border-dashed border-[#ddd] dark:border-[#555]">
+                  No outdated runtimes manually configured. Runtimes will be updated with the latest amplify backend version.
                 </p>
               </div>
             </Show>
@@ -1132,39 +1135,42 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
             <Show
               when={buildConfigStatus() === "success" && buildConfigMessage()}
             >
-              <div class="operation-result">
-                <p class="upgrade-message">{buildConfigMessage()}</p>
+              <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+                <div class="bg-[#f0f9ff] dark:bg-[#07253d] border border-[#bae6fd] dark:border-[#1e3a8a] rounded-lg p-3 flex items-start gap-3 text-blue-800 dark:text-blue-300">
+                  <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p class="m-0 text-[0.85rem] leading-relaxed">{buildConfigMessage()}</p>
+                </div>
               </div>
             </Show>
             {/* Build Configuration Changes Display */}
             <Show when={appState.repository.buildConfigChange}>
-              <div class="result-balanced">
-                <h4>Build Configuration Updated</h4>
-                <div class="result-row-balanced">
-                  <div class="result-item-balanced half-width">
-                    <span class="result-item-label-balanced">Location:</span>
-                    <span class="result-item-value-balanced">
+              <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+                <h4 class="text-[0.9rem] font-bold text-[#555] dark:text-[#ccc] mb-4 uppercase tracking-tight">Configuration Changes</h4>
+                <div class="bg-white dark:bg-[#333] rounded-xl p-5 border border-[#f0f0f0] dark:border-[#444] shadow-sm">
+                  <div class="flex items-center gap-3 mb-5 pb-3 border-b border-[#f5f5f5] dark:border-[#444]">
+                    <span class="text-[0.7rem] font-bold text-[#999] dark:text-[#666] uppercase tracking-widest leading-none">Location</span>
+                    <span class="text-[0.9rem] font-bold text-[#333] dark:text-[#eee]">
                       {appState.repository.buildConfigChange?.location ===
                         "Cloud"
-                        ? "AWS Cloud Configuration"
+                        ? "AWS Cloud (amplify.yml)"
                         : appState.repository.buildConfigChange?.location}
                     </span>
                   </div>
-                </div>
-                <div class="result-row-balanced">
-                  <div class="result-item-balanced full-width">
-                    <span class="result-item-label-balanced">Old Command:</span>
-                    <span class="result-item-value-balanced old-value">
-                      {appState.repository.buildConfigChange?.old_command}
-                    </span>
-                  </div>
-                </div>
-                <div class="result-row-balanced">
-                  <div class="result-item-balanced full-width">
-                    <span class="result-item-label-balanced">New Command:</span>
-                    <span class="result-item-value-balanced new-value">
-                      {appState.repository.buildConfigChange?.new_command}
-                    </span>
+                  <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                      <span class="text-[0.7rem] font-bold text-[#c62828] dark:text-[#ef5350] uppercase tracking-widest leading-none">Old Command</span>
+                      <code class="text-[0.8rem] bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 p-3 rounded-lg font-mono break-all line-through decoration-red-400/50 decoration-2">
+                        {appState.repository.buildConfigChange?.old_command}
+                      </code>
+                    </div>
+                    <div class="flex flex-col gap-2 pt-2 border-t border-[#f5f5f5] dark:border-[#444]">
+                      <span class="text-[0.7rem] font-bold text-[#2e7d32] dark:text-[#81c784] uppercase tracking-widest leading-none">New Command</span>
+                      <code class="text-[0.85rem] bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 p-3 rounded-lg font-mono break-all font-bold border border-green-200 dark:border-green-800/50 shadow-sm shadow-green-600/5">
+                        {appState.repository.buildConfigChange?.new_command}
+                      </code>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1203,14 +1209,17 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               <Show
                 when={gen2EnvVarStatus() === "success" && gen2EnvVarMessage()}
               >
-                <div class="operation-result">
-                  <h4>Environment Variable Changes</h4>
-                  <div class="env-var-simple-list">
+                <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+                  <h4 class="text-[0.9rem] font-bold text-[#555] dark:text-[#ccc] mb-3 uppercase tracking-tight">Environment Changes</h4>
+                  <div class="bg-[#fafafa] dark:bg-[#222] rounded-lg border border-[#f0f0f0] dark:border-[#333] divide-y divide-[#f0f0f0] dark:divide-[#333]">
                     {gen2EnvVarMessage()
                       ?.split("\n")
                       .filter((line) => line.trim())
                       .map((line) => (
-                        <div class="env-var-simple-item">{line}</div>
+                        <div class="p-3 font-mono text-[0.85rem] text-[#444] dark:text-[#bbb] flex items-center gap-3">
+                          <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                          {line}
+                        </div>
                       ))}
                   </div>
                 </div>
@@ -1218,32 +1227,31 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
             </OperationCard>
           </Show>
 
-          {/* Gen2 Optional Build Test Section - Show only after all required operations are complete */}
           <Show
             when={
               appState.repository.backendType === "Gen2" &&
               gen2EnvVarStatus() === "success"
             }
           >
-            <div class="optional-build-section">
-              <label class="checkbox-label">
+            <div class="bg-gradient-to-br from-white to-[#f8faff] dark:from-[#2a2a2a] dark:to-[#1e293b] border border-[#dbeafe] dark:border-[#1e3a8a] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
+              <div class="absolute top-0 right-0 w-32 h-32 bg-blue-100/30 dark:bg-blue-900/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none transition-transform group-hover:scale-125 duration-500"></div>
+              <label class="flex items-center gap-4 cursor-pointer relative z-10 select-none">
                 <input
                   type="checkbox"
+                  class="w-6 h-6 rounded-md accent-[#396cd8] cursor-pointer transition-transform active:scale-90"
                   checked={gen2SandboxEnabled()}
                   onChange={(e) =>
                     setGen2SandboxEnabled(e.currentTarget.checked)
                   }
                 />
-                <span>Deploy sandbox and run build test (optional)</span>
+                <span class="text-[1.05rem] font-bold text-[#333] dark:text-[#eee] tracking-tight">Deploy sandbox & run build test (recommended)</span>
               </label>
-              <p class="optional-hint">
-                You can continue without testing. Enable this to deploy a
-                sandbox environment and verify the build.
+              <p class="m-0 mt-3 pl-10 text-[0.9rem] text-[#666] dark:text-[#94a3b8] leading-relaxed relative z-10 italic">
+                Enable this to deploy an ephemeral sandbox and verify the frontend build.
               </p>
             </div>
           </Show>
 
-          {/* Gen2 Sandbox Deployment (Step 6a - only when enabled and all required operations complete) */}
           <Show
             when={
               appState.repository.backendType === "Gen2" &&
@@ -1288,8 +1296,8 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
               title="Build Verification"
               description={
                 appState.repository.backendType === "Gen1"
-                  ? "Run amplify build and frontend build"
-                  : "Run frontend build"
+                  ? "Verify amplify build and frontend build"
+                  : "Verify frontend build against sandbox schema"
               }
               status={buildStatus()}
               onAction={
@@ -1299,22 +1307,22 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
                   ? handleBuild
                   : undefined
               }
-              actionLabel="Build"
+              actionLabel="Start Build"
               pendingLabel={
                 (appState.repository.backendType === "Gen2" &&
                   sandboxStatus() !== "success")
-                  ? "Waiting for sandbox deployment"
+                  ? "Waiting for sandbox..."
                   : undefined
               }
               runningLabel="Building..."
-              successLabel="✓ Build Passed"
+              successLabel="✓ Build Successful"
               failedLabel="✗ Build Failed"
               error={buildError()}
             >
               <Show when={buildOutput()}>
                 <LogViewer
                   output={buildOutput()}
-                  title="Build Output"
+                  title="Build Log"
                   isRunning={buildStatus() === "running"}
                 />
               </Show>
@@ -1331,24 +1339,27 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
             <OperationCard
               stepNumber={6}
               title="Update Environment Variables"
-              description="Update environment variables for Gen1 backend"
+              description="Configure AWS Amplify build image settings to Amazon Linux 2023"
               status={envVarStatus()}
               onAction={handleEnvVarUpdate}
               actionLabel="Update"
               runningLabel="Updating..."
-              successLabel="✓ Updated"
-              failedLabel="✗ Failed"
+              successLabel="✓ Settings Updated"
+              failedLabel="✗ Update Failed"
               error={envVarError()}
             >
               <Show when={envVarStatus() === "success" && envVarMessage()}>
-                <div class="operation-result">
-                  <h4>Environment Variable Changes</h4>
-                  <div class="env-var-simple-list">
+                <div class="mt-4 pt-4 border-t border-[#f0f0f0] dark:border-[#444]">
+                  <h4 class="text-[0.9rem] font-bold text-[#555] dark:text-[#ccc] mb-3 uppercase tracking-tight">Configuration Applied</h4>
+                  <div class="bg-[#fafafa] dark:bg-[#222] rounded-lg border border-[#f0f0f0] dark:border-[#333] divide-y divide-[#f0f0f0] dark:divide-[#333]">
                     {envVarMessage()
                       ?.split("\n")
                       .filter((line) => line.trim())
                       .map((line) => (
-                        <div class="env-var-simple-item">{line}</div>
+                        <div class="p-3 font-mono text-[0.85rem] text-[#444] dark:text-[#bbb] flex items-center gap-3">
+                          <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                          {line}
+                        </div>
                       ))}
                   </div>
                 </div>
@@ -1359,39 +1370,25 @@ export function CloneUpdateStep(props: CloneUpdateStepProps) {
       </div>
 
       {/* Actions */}
-      <div class="actions">
+      <div class="flex items-center justify-between gap-4 mt-8">
         <button
           onClick={handleBack}
-          class="secondary-button"
+          class="bg-white dark:bg-[#2a2a2a] text-[#396cd8] dark:text-[#64b5f6] border border-[#396cd8] dark:border-[#1e3a8a] px-8 py-3 rounded-xl font-bold cursor-pointer transition-all duration-200 hover:bg-[#396cd8] dark:hover:bg-[#1e3a8a] hover:text-white dark:hover:text-white disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed shadow-sm active:scale-95"
           disabled={isAnyOperationRunning()}
         >
           Back
         </button>
         <button
           onClick={handleContinue}
-          class="primary-button"
+          class="bg-[#396cd8] dark:bg-[#3b82f6] text-white border-none px-12 py-3 rounded-xl font-bold cursor-pointer transition-all duration-200 hover:bg-[#2d5bb8] dark:hover:bg-[#2563eb] disabled:bg-[#eee] dark:disabled:bg-[#333] disabled:text-[#999] dark:disabled:text-[#666] disabled:cursor-not-allowed active:scale-95 flex items-center gap-2 group"
           disabled={!canContinue()}
         >
-          Continue to Push
+          Continue
+          <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
         </button>
       </div>
-
-      <Show when={!canContinue() && buildStatus() !== "running"}>
-        <p class="info-message">
-          <Show when={appState.repository.backendType === "Gen1"}>
-            Complete all steps above to continue to the push step.
-          </Show>
-          <Show when={appState.repository.backendType === "Gen2"}>
-            Complete the prepare project and build configuration steps to
-            continue. Build test is optional for Gen2.
-          </Show>
-          <Show when={!appState.repository.backendType}>
-            Complete all steps above to continue to the push step.
-          </Show>
-        </p>
-      </Show>
-
-      {/* Cleanup Confirmation Dialog - Handled by App.tsx globally */}
     </div>
   );
 }

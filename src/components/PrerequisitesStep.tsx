@@ -2,8 +2,6 @@ import { createSignal, onMount, Show, For } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import type { PrerequisitesResult, ToolStatus } from "../types";
 import { appState, setAppState } from "../store/appStore";
-import "./shared.css";
-import "./PrerequisitesStep.css";
 
 interface ToolInfo {
   name: string;
@@ -231,46 +229,51 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
   };
 
   return (
-    <div class="step-container prerequisites-step">
-      <h2>Prerequisites Check</h2>
-      <p class="step-description">
+    <div class="max-w-[800px] mx-auto opacity-1 animate-[fadeIn_0.1s_ease-in] prerequisites-step">
+      <h2 class="text-2xl font-bold text-[#333] dark:text-[#eee] mb-2 text-center">Prerequisites Check</h2>
+      <p class="text-[#666] dark:text-[#aaa] mb-8 text-center leading-relaxed max-w-[600px] mx-auto">
         Verifying that required tools are installed on your system.
       </p>
 
       <Show when={isLoading()}>
-        <div class="loading">
-          <span class="spinner"></span>
-          Checking prerequisites...
+        <div class="flex flex-col items-center justify-center p-12 bg-white dark:bg-[#2a2a2a] rounded-2xl border border-[#eee] dark:border-[#444] shadow-sm mb-8 animate-pulse">
+          <span class="w-10 h-10 border-4 border-[#eee] dark:border-[#444] border-t-[#396cd8] dark:border-t-[#3b82f6] rounded-full animate-spin mb-4"></span>
+          <span class="text-[#666] dark:text-[#aaa] font-medium tracking-tight">Checking prerequisites...</span>
         </div>
       </Show>
 
       <Show when={error()}>
-        <div class="message error message-with-actions">
-          {error()}
-          <button onClick={checkPrerequisites} class="retry-button">
-            Retry
+        <div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30 rounded-xl p-5 mb-8 flex items-center justify-between gap-4 text-red-800 dark:text-red-300 shadow-sm shadow-red-500/5">
+          <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p class="text-[0.9rem] font-medium leading-relaxed m-0">{error()}</p>
+          </div>
+          <button onClick={checkPrerequisites} class="bg-white dark:bg-[#333] text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-4 py-2 rounded-lg font-bold text-[0.8rem] cursor-pointer transition-all hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 shrink-0">
+            Retry Check
           </button>
         </div>
       </Show>
 
       <Show when={!isLoading() && !error()}>
-        <div class="tools-list">
+        <div class="flex flex-col gap-4 mb-10">
           <For each={TOOLS}>
             {(tool) => {
               const status = () => getToolStatus(tool);
               return (
                 <div
-                  class={`tool-item ${status().installed ? "installed" : "missing"}`}
+                  class={`p-5 rounded-2xl border transition-all duration-300 flex flex-col gap-4 ${status().installed ? "bg-green-50/30 dark:bg-green-900/5 border-green-100 dark:border-green-800/30" : "bg-red-50/30 dark:bg-red-900/5 border-red-100 dark:border-red-800/30"}`}
                 >
-                  <div class="tool-header">
+                  <div class="flex items-center gap-4">
                     <span
-                      class={`status-icon ${status().installed ? "check" : "x"}`}
+                      class={`flex items-center justify-center w-8 h-8 rounded-full text-[0.9rem] font-bold ${status().installed ? "bg-[#e8f5e9] dark:bg-[#1b5e20] text-[#2e7d32] dark:text-[#a5d6a7]" : "bg-[#fbe9e7] dark:bg-[#b71c1c] text-[#c62828] dark:text-[#ef9a9a]"}`}
                     >
                       {status().installed ? "✓" : "✗"}
                     </span>
-                    <span class="tool-name">{tool.name}</span>
+                    <span class="text-[1.1rem] font-bold text-[#333] dark:text-[#eee] grow">{tool.name}</span>
                     <Show when={status().installed && status().version}>
-                      <span class="tool-version">
+                      <span class="text-[0.85rem] font-mono font-bold bg-white/60 dark:bg-black/20 px-2 py-0.5 rounded border border-[#0000000a] dark:border-[#ffffff0a] text-[#666] dark:text-[#bbb]">
                         {tool.key === "network"
                           ? status().version
                           : `v${status().version}`}
@@ -279,19 +282,25 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
                   </div>
 
                   <Show when={!status().installed}>
-                    <div class="install-guidance">
-                      <p>{tool.installGuide}</p>
+                    <div class="mt-1 pt-4 border-t border-red-100 dark:border-red-800/20 animate-[slideDown_0.2s_ease-out]">
+                      <p class="m-0 text-[0.9rem] text-[#666] dark:text-[#aaa] leading-relaxed mb-3">{tool.installGuide}</p>
                       <Show when={tool.installUrl}>
                         <a
                           href={tool.installUrl}
                           target="_blank"
                           rel="noopener noreferrer"
+                          class="inline-flex items-center gap-1.5 text-[#396cd8] dark:text-[#64b5f6] text-[0.85rem] font-bold hover:underline"
                         >
-                          Installation Guide →
+                          Installation Guide
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
                         </a>
                       </Show>
                       <Show when={status().error}>
-                        <p class="error-detail">{status().error}</p>
+                        <div class="mt-3 p-3 bg-red-100/30 dark:bg-red-950/20 rounded-lg border border-red-200/20 dark:border-red-800/10">
+                          <p class="m-0 text-[0.8rem] text-red-600 dark:text-red-400 font-mono italic">{status().error}</p>
+                        </div>
                       </Show>
                     </div>
                   </Show>
@@ -302,31 +311,31 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
         </div>
 
         {/* Optional Tools Section */}
-        <div class="optional-tools-section">
-          <h3>Optional Tools</h3>
-          <p class="optional-description">
+        <div class="mt-12 mb-8 pt-8 border-t border-[#eee] dark:border-[#444]">
+          <h3 class="text-[1.1rem] font-bold text-[#666] dark:text-[#aaa] mb-2 uppercase tracking-tight">Optional Tools</h3>
+          <p class="text-[0.85rem] text-[#888] mb-6">
             These tools may be required depending on your project configuration.
           </p>
-          <div class="optional-tools-grid">
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
             <For each={OPTIONAL_TOOLS}>
               {(tool) => {
                 const status = () => getOptionalToolStatus(tool.stateKey);
                 return (
                   <div
-                    class={`optional-tool-item ${status().installed ? "installed" : "not-installed"}`}
+                    class={`border rounded-xl p-3 flex flex-col gap-1 transition-all duration-200 ${status().installed ? "bg-green-50/20 dark:bg-green-900/10 border-green-100 dark:border-green-800/20" : "bg-[#fafafa] dark:bg-[#2a2a2a] border-[#e0e0e0] dark:border-[#444]"}`}
                   >
-                    <div class="optional-tool-header">
+                    <div class="flex items-center gap-2">
                       <span
-                        class={`status-dot ${status().installed ? "green" : "gray"}`}
+                        class={`w-2 h-2 rounded-full shrink-0 ${status().installed ? "bg-[#4caf50]" : "bg-[#bdbdbd] dark:bg-[#666]"}`}
                       ></span>
-                      <span class="optional-tool-name">{tool.name}</span>
+                      <span class="text-[0.9rem] font-bold text-[#333] dark:text-[#eee] truncate grow">{tool.name}</span>
                       <Show when={status().installed && status().version}>
-                        <span class="optional-tool-version">
+                        <span class="text-[0.75rem] text-[#666] dark:text-[#aaa] font-mono">
                           {status().version}
                         </span>
                       </Show>
                     </div>
-                    <p class="optional-tool-description">{tool.description}</p>
+                    <p class="m-0 text-[0.7rem] text-[#888] dark:text-[#666] leading-tight grow">{tool.description}</p>
                   </div>
                 );
               }}
@@ -334,32 +343,35 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
           </div>
         </div>
 
-        <div class="actions">
-          <button onClick={checkPrerequisites} class="secondary-button">
-            Re-check
+        <div class="flex items-center justify-between gap-4 mt-8">
+          <button onClick={checkPrerequisites} class="bg-white dark:bg-[#2a2a2a] text-[#396cd8] dark:text-[#64b5f6] border border-[#396cd8] dark:border-[#1e3a8a] px-8 py-3 rounded-xl font-bold cursor-pointer transition-all duration-200 hover:bg-[#396cd8] dark:hover:bg-[#1e3a8a] hover:text-white dark:hover:text-white active:scale-95 shadow-sm">
+            Check Again
           </button>
           <button
             onClick={handleContinue}
-            class="primary-button"
+            class="bg-[#396cd8] dark:bg-[#3b82f6] text-white border-none px-12 py-3 rounded-xl font-bold cursor-pointer transition-all duration-200 hover:bg-[#2d5bb8] dark:hover:bg-[#2563eb] disabled:bg-[#eee] dark:disabled:bg-[#333] disabled:text-[#999] dark:disabled:text-[#666] disabled:cursor-not-allowed active:scale-95 flex items-center gap-2 group"
             disabled={!allPrerequisitesMet()}
           >
             Continue
+            <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </button>
         </div>
 
         <Show when={!allPrerequisitesMet()}>
-          <Show when={!appState.prerequisites.network.installed}>
-            <p class="message warning">
-              <strong>Network Connection Required:</strong> Some features
-              require internet connectivity. Please check your network
-              connection and try again. Local tools can still be verified.
-            </p>
-          </Show>
-          <Show when={appState.prerequisites.network.installed}>
-            <p class="message warning">
-              Please install all required tools before continuing.
-            </p>
-          </Show>
+          <div class="mt-[-2rem] mb-12 animate-pulse">
+            <Show when={!appState.prerequisites.network.installed}>
+              <p class="px-5 py-3 bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 rounded-xl text-[0.85rem] font-medium border border-red-100 dark:border-red-800/30 text-center">
+                <span class="font-bold">Network Connection Required:</span> Some features require internet connectivity. Local tools can still be verified.
+              </p>
+            </Show>
+            <Show when={appState.prerequisites.network.installed}>
+              <p class="px-5 py-3 bg-blue-50 dark:bg-blue-900/10 text-[#1e40af] dark:text-[#93c5fd] rounded-xl text-[0.85rem] font-medium border border-blue-100 dark:border-blue-800/30 text-center">
+                Please install all required tools before continuing.
+              </p>
+            </Show>
+          </div>
         </Show>
       </Show>
     </div>

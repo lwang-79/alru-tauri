@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 400;
+        color: #0f0f0f;
+        background-color: #f6f6f6;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-text-size-adjust: 100%;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            color: #f6f6f6;
+            background-color: #1a1a1a;
+        }
+    }
+
+    body,
+    html {
+        overflow: hidden;
+        -webkit-app-region: no-drag;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Prevent image and element dragging */
+    img,
+    a,
+    button,
+    div {
+        -webkit-user-drag: none;
+    }
+
+    /* Allow text selection in specific areas */
+    input,
+    textarea,
+    code,
+    pre,
+    .selectable {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    /* Hide scrollbar */
+    * {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    *::-webkit-scrollbar {
+        display: none;
+    }
+}

@@ -1,5 +1,4 @@
 import { createEffect, Show } from "solid-js";
-import "./LogViewer.css";
 
 interface LogViewerProps {
     output: string;
@@ -22,16 +21,16 @@ export function LogViewer(props: LogViewerProps) {
     });
 
     return (
-        <div class={`log-viewer-container ${props.className || ""}`}>
-            <div class="log-viewer-header">
+        <div class={`mt-4 border border-[#e0e0e0] dark:border-[#444] rounded-md overflow-hidden ${props.className || ""}`}>
+            <div class="flex justify-between items-center px-4 py-2 bg-[#f5f5f5] dark:bg-[#333] border-b border-[#e0e0e0] dark:border-b-[#444] text-[0.85rem] font-medium text-[#666] dark:text-[#aaa]">
                 <span>{props.title}</span>
                 <Show when={props.isRunning}>
-                    <span class="live-indicator">● Live</span>
+                    <span class="text-[#4caf50] text-[0.8rem] animate-pulse">● Live</span>
                 </Show>
             </div>
             <pre
                 ref={preRef}
-                class="log-viewer-content"
+                class="m-0 p-4 bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[0.8rem] overflow-y-auto whitespace-pre-wrap break-words"
                 style={{ "max-height": props.maxHeight || "400px" }}
             >
                 {props.output}
