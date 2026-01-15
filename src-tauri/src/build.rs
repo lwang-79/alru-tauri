@@ -1,4 +1,4 @@
-use crate::command::{create_clean_shell_command, CommandExtClean};
+use crate::command::create_clean_shell_command;
 use crate::file_ops::detector::{BackendType, PackageManager};
 use crate::file_ops::BuildResult;
 

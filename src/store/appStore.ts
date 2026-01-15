@@ -31,9 +31,9 @@ export interface AppState {
     awsCli: ToolStatus;
     git: ToolStatus;
     nodejs: ToolStatus;
+    npm: ToolStatus;
     // Optional tools
     amplifyCli: ToolStatus;
-    npm: ToolStatus;
     yarn: ToolStatus;
     pnpm: ToolStatus;
     bun: ToolStatus;
@@ -119,9 +119,9 @@ const initialState: AppState = {
     awsCli: { installed: false, version: null, error: null },
     git: { installed: false, version: null, error: null },
     nodejs: { installed: false, version: null, error: null },
+    npm: { installed: false, version: null, error: null },
     // Optional tools
     amplifyCli: { installed: false, version: null, error: null },
-    npm: { installed: false, version: null, error: null },
     yarn: { installed: false, version: null, error: null },
     pnpm: { installed: false, version: null, error: null },
     bun: { installed: false, version: null, error: null },

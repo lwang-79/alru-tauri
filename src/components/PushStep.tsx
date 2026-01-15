@@ -70,6 +70,26 @@ export function PushStep(props: PushStepProps) {
   const [revertBuildSpecInProgress, setRevertBuildSpecInProgress] =
     createSignal(false);
 
+  // Sync running state to store for global access
+  const isOperationActive = () => {
+    const job = amplifyJob();
+    const isJobRunning =
+      job && !["SUCCEED", "FAILED", "CANCELLED"].includes(job.status.toUpperCase());
+
+    return (
+      pushStatus() === "running" ||
+      checkingForJob() ||
+      !!isJobRunning ||
+      retryingJob() ||
+      revertInProgress() ||
+      revertBuildSpecInProgress()
+    );
+  };
+
+  createEffect(() => {
+    setAppState("repository", "isOperationRunning", isOperationActive());
+  });
+
   // Check if state should be reset on mount and when navigating to this step
   onMount(() => {
     checkAndResetPushStepIfNeeded();
@@ -560,6 +580,7 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
 
 
   const handleBack = () => {
+    if (isOperationActive()) return;
     if (props.onBack) {
       props.onBack();
     }
@@ -939,17 +960,17 @@ This update ensures Lambda functions use supported Node.js runtimes.`;
       </div>
 
       {/* Actions */}
-      <div class="flex justify-end gap-3 mt-8">
+      <div class="flex justify-between gap-3 mt-8">
         <button
           onClick={handleBack}
           class="bg-transparent text-[#396cd8] border border-[#396cd8] px-6 py-2.5 rounded-md font-medium cursor-pointer transition-all duration-200 hover:bg-[#396cd8] hover:text-white disabled:opacity-60 disabled:cursor-not-allowed"
-          disabled={pushStatus() === "running"}
+          disabled={isOperationActive()}
         >
           Back
         </button>
         <Show when={pushStatus() === "success"}>
           <button onClick={handleFinish} class="bg-[#396cd8] text-white border-none px-6 py-2.5 rounded-md font-medium cursor-pointer transition-all duration-200 hover:bg-[#2563eb]">
-            Clean Up
+            Complete
           </button>
         </Show>
       </div>

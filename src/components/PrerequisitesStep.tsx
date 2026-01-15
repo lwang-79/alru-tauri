@@ -1,19 +1,19 @@
-import { createSignal, onMount, Show, For } from "solid-js";
+import { createSignal, onMount, Show, For, createEffect } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import type { PrerequisitesResult, ToolStatus } from "../types";
 import { appState, setAppState } from "../store/appStore";
 
 interface ToolInfo {
   name: string;
-  key: "network" | "awsCli" | "git" | "nodejs";
-  stateKey: "network" | "aws_cli" | "git" | "nodejs";
+  key: "network" | "awsCli" | "git" | "nodejs" | "npm";
+  stateKey: "network" | "aws_cli" | "git" | "nodejs" | "npm";
   installUrl: string;
   installGuide: string;
 }
 
 interface OptionalToolInfo {
   name: string;
-  stateKey: "amplify_cli" | "npm" | "yarn" | "pnpm" | "bun";
+  stateKey: "amplify_cli" | "yarn" | "pnpm" | "bun";
   description: string;
 }
 
@@ -47,6 +47,13 @@ const TOOLS: ToolInfo[] = [
     installUrl: "https://nodejs.org/",
     installGuide: "Install Node.js LTS version from nodejs.org",
   },
+  {
+    name: "npm",
+    key: "npm",
+    stateKey: "npm",
+    installUrl: "https://docs.npmjs.com/downloading-and-installing-node-js-and-npm",
+    installGuide: "npm is usually installed with Node.js. If missing, reinstall Node.js.",
+  },
 ];
 
 const OPTIONAL_TOOLS: OptionalToolInfo[] = [
@@ -54,11 +61,6 @@ const OPTIONAL_TOOLS: OptionalToolInfo[] = [
     name: "Amplify CLI",
     stateKey: "amplify_cli",
     description: "For Amplify Gen1 App",
-  },
-  {
-    name: "npm",
-    stateKey: "npm",
-    description: "Package manager",
   },
   {
     name: "yarn",
@@ -85,6 +87,11 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
   const [isLoading, setIsLoading] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
 
+  // Sync running state to store for global access
+  createEffect(() => {
+    setAppState("repository", "isOperationRunning", isLoading());
+  });
+
   const checkPrerequisites = async () => {
     setIsLoading(true);
     setError(null);
@@ -97,9 +104,9 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
         awsCli: result.aws_cli,
         git: result.git,
         nodejs: result.nodejs,
+        npm: result.npm,
         // Optional tools
         amplifyCli: result.amplify_cli,
-        npm: result.npm,
         yarn: result.yarn,
         pnpm: result.pnpm,
         bun: result.bun,
@@ -132,12 +139,13 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
           version: null,
           error: "Check failed - unable to verify installation",
         },
-        amplifyCli: {
+        npm: {
           installed: false,
           version: null,
           error: "Check failed - unable to verify installation",
         },
-        npm: {
+        // Optional tools
+        amplifyCli: {
           installed: false,
           version: null,
           error: "Check failed - unable to verify installation",
@@ -197,7 +205,8 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
     const requiredToolsOk =
       prereqs.awsCli.installed &&
       prereqs.git.installed &&
-      prereqs.nodejs.installed;
+      prereqs.nodejs.installed &&
+      prereqs.npm.installed;
 
     return networkOk && requiredToolsOk;
   };
@@ -214,7 +223,6 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
       keyof typeof appState.prerequisites
     > = {
       amplify_cli: "amplifyCli",
-      npm: "npm",
       yarn: "yarn",
       pnpm: "pnpm",
       bun: "bun",
@@ -360,15 +368,10 @@ export function PrerequisitesStep(props: PrerequisitesStepProps) {
         </div>
 
         <Show when={!allPrerequisitesMet()}>
-          <div class="mt-[-2rem] mb-12 animate-pulse">
-            <Show when={!appState.prerequisites.network.installed}>
-              <p class="px-5 py-3 bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 rounded-xl text-[0.85rem] font-medium border border-red-100 dark:border-red-800/30 text-center">
-                <span class="font-bold">Network Connection Required:</span> Some features require internet connectivity. Local tools can still be verified.
-              </p>
-            </Show>
+          <div class="mt-8">
             <Show when={appState.prerequisites.network.installed}>
-              <p class="px-5 py-3 bg-blue-50 dark:bg-blue-900/10 text-[#1e40af] dark:text-[#93c5fd] rounded-xl text-[0.85rem] font-medium border border-blue-100 dark:border-blue-800/30 text-center">
-                Please install all required tools before continuing.
+              <p class="px-5 py-3 bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 rounded-xl text-[0.85rem] font-medium border border-red-100 dark:border-red-800/30 text-center">
+                Please meet all prerequisites before continuing.
               </p>
             </Show>
           </div>

@@ -296,7 +296,7 @@ pub async fn update_live_updates_env_var(
         let env_vars_json = serde_json::to_string(&updated_app_env_vars)
             .map_err(|e| format!("Failed to serialize app environment variables: {}", e))?;
 
-        let output = crate::command::create_clean_command("aws")
+        let output = crate::command::create_clean_shell_command("aws")
             .args([
                 "amplify",
                 "update-app",
@@ -362,7 +362,7 @@ pub async fn update_live_updates_env_var(
         let env_vars_json = serde_json::to_string(&updated_branch_env_vars)
             .map_err(|e| format!("Failed to serialize branch environment variables: {}", e))?;
 
-        let output = crate::command::create_clean_command("aws")
+        let output = crate::command::create_clean_shell_command("aws")
             .args([
                 "amplify",
                 "update-branch",
@@ -492,7 +492,7 @@ pub async fn update_app_env_vars(
         region,
     ];
 
-    let output = crate::command::create_clean_command("aws")
+    let output = crate::command::create_clean_shell_command("aws")
         .args(command_args)
         .output()
         .map_err(|e| format!("Failed to execute AWS CLI for app update: {}", e))?;
@@ -541,7 +541,7 @@ pub async fn update_branch_env_vars(
         region,
     ];
 
-    let output = crate::command::create_clean_command("aws")
+    let output = crate::command::create_clean_shell_command("aws")
         .args(command_args)
         .output()
         .map_err(|e| format!("Failed to execute AWS CLI for branch update: {}", e))?;

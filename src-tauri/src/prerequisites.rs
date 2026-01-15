@@ -16,9 +16,9 @@ pub struct PrerequisitesResult {
     pub aws_cli: ToolStatus,
     pub git: ToolStatus,
     pub nodejs: ToolStatus,
+    pub npm: ToolStatus,
     // Optional tools - absence won't block continuation
     pub amplify_cli: ToolStatus,
-    pub npm: ToolStatus,
     pub yarn: ToolStatus,
     pub pnpm: ToolStatus,
     pub bun: ToolStatus,
@@ -285,8 +285,9 @@ pub async fn check_prerequisites() -> Result<PrerequisitesResult, String> {
         aws_cli: check_aws_cli(),
         git: check_git(),
         nodejs: check_nodejs(),
-        amplify_cli: check_amplify_cli(),
         npm: check_npm(),
+        // Optional tools
+        amplify_cli: check_amplify_cli(),
         yarn: check_yarn(),
         pnpm: check_pnpm(),
         bun: check_bun(),

@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, For } from "solid-js";
+import { createSignal, onMount, Show, For, createEffect } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import type { AwsProfile } from "../types";
 import { appState, setAppState, clearDownstreamState } from "../store/appStore";
@@ -12,6 +12,13 @@ export function ProfileRegionStep(props: ProfileRegionStepProps) {
   const [isLoadingProfiles, setIsLoadingProfiles] = createSignal(false);
   const [isLoadingRegions, setIsLoadingRegions] = createSignal(false);
   const [error, setError] = createSignal<string | null>(null);
+
+  const isLoading = () => isLoadingProfiles() || isLoadingRegions();
+
+  // Sync running state to store for global access
+  createEffect(() => {
+    setAppState("repository", "isOperationRunning", isLoading());
+  });
 
   const loadProfileRegion = async (profile: string) => {
     try {
@@ -130,12 +137,13 @@ export function ProfileRegionStep(props: ProfileRegionStepProps) {
   };
 
   const handleBack = () => {
+    if (isLoading()) return;
     if (props.onBack) {
       props.onBack();
     }
   };
 
-  const isLoading = () => isLoadingProfiles() || isLoadingRegions();
+  // Removed local isLoading in favor of the one at the top level of component
 
   return (
     <div class="max-w-[800px] mx-auto opacity-1 animate-[fadeIn_0.1s_ease-in] profile-region-step">

@@ -1,4 +1,4 @@
-use crate::command::{create_clean_shell_command, CommandExtClean};
+use crate::command::create_clean_shell_command;
 use serde::{Deserialize, Serialize};
 
 /// Represents a package entry in the _LIVE_UPDATES environment variable

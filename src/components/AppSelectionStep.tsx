@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, For } from "solid-js";
+import { createSignal, onMount, Show, For, createEffect } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import type {
   AmplifyApp,
@@ -18,6 +18,14 @@ export function AppSelectionStep(props: AppSelectionStepProps) {
   const [isLoadingBranches, setIsLoadingBranches] = createSignal(false);
   const [isLoadingFunctions, setIsLoadingFunctions] = createSignal(false);
   const [error, setError] = createSignal<string | null>(null);
+
+  const isLoading = () =>
+    isLoadingApps() || isLoadingBranches() || isLoadingFunctions();
+
+  // Sync running state to store for global access
+  createEffect(() => {
+    setAppState("repository", "isOperationRunning", isLoading());
+  });
 
   // Load supported Node.js runtimes
   const loadSupportedRuntimes = async () => {
@@ -260,6 +268,7 @@ export function AppSelectionStep(props: AppSelectionStepProps) {
   };
 
   const handleBack = () => {
+    if (isLoading()) return;
     if (props.onBack) {
       props.onBack();
     }
@@ -277,8 +286,7 @@ export function AppSelectionStep(props: AppSelectionStepProps) {
     ).length;
   };
 
-  const isLoading = () =>
-    isLoadingApps() || isLoadingBranches() || isLoadingFunctions();
+  // Removed local isLoading in favor of the one at the top level of component
 
   return (
     <div class="max-w-[800px] mx-auto app-selection-step">

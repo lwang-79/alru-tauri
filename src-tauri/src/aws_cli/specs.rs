@@ -41,7 +41,7 @@ pub fn update_app_build_spec(
     app_id: &str,
     build_spec: &str,
 ) -> Result<bool, String> {
-    let output = crate::command::create_clean_command("aws")
+    let output = crate::command::create_clean_shell_command("aws")
         .args([
             "amplify",
             "update-app",

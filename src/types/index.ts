@@ -12,9 +12,9 @@ export interface PrerequisitesResult {
   aws_cli: ToolStatus;
   git: ToolStatus;
   nodejs: ToolStatus;
+  npm: ToolStatus;
   // Optional tools
   amplify_cli: ToolStatus;
-  npm: ToolStatus;
   yarn: ToolStatus;
   pnpm: ToolStatus;
   bun: ToolStatus;
