@@ -143,8 +143,6 @@ export function ProfileRegionStep(props: ProfileRegionStepProps) {
     }
   };
 
-  // Removed local isLoading in favor of the one at the top level of component
-
   return (
     <div class="max-w-[800px] mx-auto opacity-1 animate-[fadeIn_0.1s_ease-in] profile-region-step">
       <h2 class="text-2xl font-bold text-[#333] dark:text-[#eee] mb-2 text-center">AWS Profile & Region</h2>

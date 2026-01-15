@@ -286,8 +286,6 @@ export function AppSelectionStep(props: AppSelectionStepProps) {
     ).length;
   };
 
-  // Removed local isLoading in favor of the one at the top level of component
-
   return (
     <div class="max-w-[800px] mx-auto app-selection-step">
       <h2 class="mb-2 text-2xl font-bold">Select Amplify App & Branch</h2>
