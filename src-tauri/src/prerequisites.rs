@@ -1,6 +1,5 @@
-use crate::command::CommandExtClean;
+use crate::command::{create_clean_shell_command, CommandExtClean};
 use serde::{Deserialize, Serialize};
-use std::process::Command;
 
 /// Status of a required tool (AWS CLI, Git, Node.js)
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -135,7 +134,7 @@ fn check_network() -> ToolStatus {
 
 /// Check if AWS CLI is installed and get its version
 fn check_aws_cli() -> ToolStatus {
-    match Command::new("aws").clean_env().arg("--version").output() {
+    match create_clean_shell_command("aws").arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
@@ -161,7 +160,7 @@ fn check_aws_cli() -> ToolStatus {
 
 /// Check if Git is installed and get its version
 fn check_git() -> ToolStatus {
-    match Command::new("git").clean_env().arg("--version").output() {
+    match create_clean_shell_command("git").arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
@@ -179,7 +178,7 @@ fn check_git() -> ToolStatus {
 
 /// Check if Node.js is installed and get its version
 fn check_nodejs() -> ToolStatus {
-    match Command::new("node").clean_env().arg("--version").output() {
+    match create_clean_shell_command("node").arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
@@ -197,7 +196,7 @@ fn check_nodejs() -> ToolStatus {
 
 /// Check if Amplify CLI is installed and get its version
 fn check_amplify_cli() -> ToolStatus {
-    match Command::new("amplify").clean_env().arg("-v").output() {
+    match create_clean_shell_command("amplify").arg("-v").output() {
         Ok(output) => {
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -216,7 +215,7 @@ fn check_amplify_cli() -> ToolStatus {
 
 /// Check if npm is installed and get its version
 fn check_npm() -> ToolStatus {
-    match Command::new("npm").clean_env().arg("--version").output() {
+    match create_clean_shell_command("npm").arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -231,7 +230,7 @@ fn check_npm() -> ToolStatus {
 
 /// Check if yarn is installed and get its version
 fn check_yarn() -> ToolStatus {
-    match Command::new("yarn").clean_env().arg("--version").output() {
+    match create_clean_shell_command("yarn").arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -246,7 +245,7 @@ fn check_yarn() -> ToolStatus {
 
 /// Check if pnpm is installed and get its version
 fn check_pnpm() -> ToolStatus {
-    match Command::new("pnpm").clean_env().arg("--version").output() {
+    match create_clean_shell_command("pnpm").arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -261,7 +260,7 @@ fn check_pnpm() -> ToolStatus {
 
 /// Check if bun is installed and get its version
 fn check_bun() -> ToolStatus {
-    match Command::new("bun").clean_env().arg("--version").output() {
+    match create_clean_shell_command("bun").arg("--version").output() {
         Ok(output) => {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout).trim().to_string();

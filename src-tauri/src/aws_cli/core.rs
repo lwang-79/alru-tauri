@@ -1,3 +1,4 @@
+use crate::command::create_clean_shell_command;
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs;
@@ -186,7 +187,7 @@ pub fn get_aws_regions() -> Vec<String> {
 
 /// Execute AWS CLI command with profile and region
 pub fn execute_aws_command(args: &[&str], profile: &str, region: &str) -> Result<String, String> {
-    let output = crate::command::create_clean_command("aws")
+    let output = create_clean_shell_command("aws")
         .args(args)
         .arg("--profile")
         .arg(profile)

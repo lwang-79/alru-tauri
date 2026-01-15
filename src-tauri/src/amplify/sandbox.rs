@@ -1,6 +1,6 @@
-use crate::command::CommandExtClean;
+use crate::command::create_clean_shell_command;
 use serde::{Deserialize, Serialize};
-use std::process::{Command, Stdio};
+use std::process::Stdio;
 
 /// Result of sandbox deployment with streaming
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -56,8 +56,7 @@ pub async fn deploy_gen2_sandbox(
     let _ = window.emit("sandbox-status", "running");
 
     // Spawn the sandbox process with AWS_REGION override
-    let mut child = Command::new("npx")
-        .clean_env()
+    let mut child = create_clean_shell_command("npx")
         .args(["ampx", "sandbox", "--profile", &profile])
         .current_dir(&project_path)
         .env("AWS_REGION", &region)
@@ -235,8 +234,7 @@ pub async fn delete_gen2_sandbox(
 ) -> Result<crate::file_ops::BuildResult, String> {
     use crate::file_ops::BuildResult;
 
-    let output = Command::new("npx")
-        .clean_env()
+    let output = create_clean_shell_command("npx")
         .args(["ampx", "sandbox", "delete", "--profile", profile, "-y"])
         .current_dir(project_path)
         .env("AWS_REGION", region)

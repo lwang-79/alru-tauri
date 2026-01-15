@@ -1,7 +1,6 @@
 use super::env::fetch_latest_amplify_cli_version;
-use crate::command::{create_clean_command, CommandExtClean};
+use crate::command::create_clean_shell_command;
 use serde::{Deserialize, Serialize};
-use std::process::Command;
 use tauri::Emitter;
 
 /// Result of upgrading Amplify CLI
@@ -71,7 +70,7 @@ pub async fn amplify_pull_streaming(
         ),
     );
 
-    let mut command = create_clean_command("amplify");
+    let mut command = create_clean_shell_command("amplify");
     command
         .args([
             "pull",
@@ -132,7 +131,7 @@ pub async fn amplify_env_checkout_streaming(
     );
     let _ = window.emit("prepare-output", format!("Environment: {}\n\n", env_name));
 
-    let mut command = create_clean_command("amplify");
+    let mut command = create_clean_shell_command("amplify");
     command
         .args(["env", "checkout", &env_name, "--yes"])
         .current_dir(&project_path);
@@ -188,7 +187,7 @@ pub async fn amplify_pull(
     );
     let providers_config = format!(r#"{{"awscloudformation":{}}}"#, aws_cloudformation_config);
 
-    let output = create_clean_command("amplify")
+    let output = create_clean_shell_command("amplify")
         .args([
             "pull",
             "--amplify",
@@ -226,8 +225,7 @@ pub async fn amplify_pull(
 #[tauri::command]
 pub async fn amplify_env_checkout(project_path: &str, env_name: &str) -> Result<bool, String> {
     // Run amplify env checkout
-    let output = Command::new("amplify")
-        .clean_env()
+    let output = create_clean_shell_command("amplify")
         .args(["env", "checkout", env_name, "--yes"])
         .current_dir(project_path)
         .output()
@@ -259,7 +257,9 @@ pub async fn amplify_env_checkout(project_path: &str, env_name: &str) -> Result<
 /// Gets the currently installed version of Amplify CLI
 fn get_installed_amplify_cli_version() -> Option<String> {
     // Try direct check with --version
-    let output = create_clean_command("amplify").arg("--version").output();
+    let output = create_clean_shell_command("amplify")
+        .arg("--version")
+        .output();
 
     let output = match output {
         Ok(out) => {
@@ -321,8 +321,7 @@ pub async fn upgrade_amplify_cli() -> Result<UpgradeResult, String> {
     }
 
     // Perform upgrade
-    let output = Command::new("npm")
-        .clean_env()
+    let output = create_clean_shell_command("npm")
         .args(["install", "-g", "@aws-amplify/cli@latest"])
         .output()
         .map_err(|e| format!("Failed to execute npm install: {}", e))?;

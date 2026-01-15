@@ -1,6 +1,5 @@
 use super::detector::PackageManager;
-use crate::command::CommandExtClean;
-use std::process::Command;
+use crate::command::create_clean_shell_command;
 
 /// Installs dependencies using the appropriate package manager command with streaming output
 ///
@@ -41,7 +40,7 @@ pub async fn install_dependencies_streaming(
         format!("Working directory: {}\n\n", project_path),
     );
 
-    let mut command = Command::new(cmd).clean_env();
+    let mut command = create_clean_shell_command(cmd);
     command.args(&args).current_dir(&project_path);
 
     match crate::command::run_command_streaming(command, &window, "prepare-output") {
@@ -95,8 +94,7 @@ pub async fn install_dependencies(
     );
     println!("[install_dependencies] Working directory: {}", project_path);
 
-    let output = Command::new(cmd)
-        .clean_env()
+    let output = create_clean_shell_command(cmd)
         .args(&args)
         .current_dir(project_path)
         .output()
@@ -182,7 +180,7 @@ pub async fn upgrade_amplify_backend_packages(
         format!("Working directory: {}\n\n", project_path),
     );
 
-    let mut upgrade_cmd = Command::new(cmd).clean_env();
+    let mut upgrade_cmd = create_clean_shell_command(cmd);
     upgrade_cmd.args(&args).current_dir(&project_path);
 
     let upgrade_success =
@@ -219,7 +217,7 @@ pub async fn upgrade_amplify_backend_packages(
         format!("Command: {} {}\n\n", install_cmd, install_args.join(" ")),
     );
 
-    let mut install_cmd_obj = Command::new(install_cmd).clean_env();
+    let mut install_cmd_obj = create_clean_shell_command(install_cmd);
     install_cmd_obj
         .args(&install_args)
         .current_dir(&project_path);

@@ -38,6 +38,7 @@ pub fn create_clean_command(program: &str) -> Command {
         "CommonProgramFiles",
         "APPDATA",
         "LOCALAPPDATA",
+        "PATHEXT",
     ];
     let vars: Vec<(String, String)> = std::env::vars().collect();
 
@@ -60,6 +61,18 @@ pub fn create_clean_command(program: &str) -> Command {
     cmd.env_remove("npm_config_prefix");
 
     cmd
+}
+
+/// Helper to create a clean Command that runs via a shell on Windows.
+/// This is necessary for executing .cmd/.bat files like npm or amplify.
+pub fn create_clean_shell_command(program: &str) -> Command {
+    if cfg!(target_os = "windows") {
+        let mut cmd = create_clean_command("cmd");
+        cmd.arg("/C").arg(program);
+        cmd
+    } else {
+        create_clean_command(program)
+    }
 }
 
 /// Helper to run a shell command with a clean environment.
@@ -109,6 +122,7 @@ impl CommandExtClean for Command {
             "CommonProgramFiles",
             "APPDATA",
             "LOCALAPPDATA",
+            "PATHEXT",
         ];
 
         let mut vars_to_keep = Vec::new();

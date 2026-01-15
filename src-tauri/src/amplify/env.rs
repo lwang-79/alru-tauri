@@ -1,6 +1,5 @@
-use crate::command::CommandExtClean;
+use crate::command::{create_clean_shell_command, CommandExtClean};
 use serde::{Deserialize, Serialize};
-use std::process::Command;
 
 /// Represents a package entry in the _LIVE_UPDATES environment variable
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -67,8 +66,7 @@ pub fn check_if_live_updates_needs_update(
 /// * `Ok(String)` - The latest version number (e.g., "14.2.1")
 /// * `Err(String)` - Error if fetching fails
 pub fn fetch_latest_amplify_cli_version() -> Result<String, String> {
-    let output = Command::new("npm")
-        .clean_env()
+    let output = create_clean_shell_command("npm")
         .args(["view", "@aws-amplify/cli", "version"])
         .output()
         .map_err(|e| format!("Failed to execute npm command: {}", e))?;

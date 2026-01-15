@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use crate::command::CommandExtClean;
-use std::process::Command;
+use crate::command::create_clean_shell_command;
 
 /// Branch protection information
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -113,8 +112,7 @@ fn get_github_token() -> Option<String> {
     }
 
     // Try git credential helper
-    let output = Command::new("git")
-        .clean_env()
+    let output = create_clean_shell_command("git")
         .args(["credential", "fill"])
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
@@ -178,7 +176,7 @@ fn check_github_rulesets(
 
     curl_args.push(&url);
 
-    let output = Command::new("curl").clean_env().args(&curl_args).output();
+    let output = create_clean_shell_command("curl").args(&curl_args).output();
 
     match output {
         Ok(output) => {
@@ -266,7 +264,7 @@ fn check_github_rulesets(
                             
                             detail_curl_args.push(self_link);
                             
-                            if let Ok(detail_output) = Command::new("curl").clean_env().args(&detail_curl_args).output() {
+                            if let Ok(detail_output) = create_clean_shell_command("curl").args(&detail_curl_args).output() {
                                 let detail_response = String::from_utf8_lossy(&detail_output.stdout);
                                 println!("[check_github_rulesets] Ruleset details: {}", detail_response);
                                 
@@ -418,7 +416,7 @@ fn check_github_branch_protection(
 
     curl_args.push(&url);
 
-    let output = Command::new("curl").clean_env().args(&curl_args).output();
+    let output = create_clean_shell_command("curl").args(&curl_args).output();
 
     match output {
         Ok(output) => {

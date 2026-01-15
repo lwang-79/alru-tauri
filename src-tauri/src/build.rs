@@ -1,7 +1,6 @@
-use crate::command::CommandExtClean;
+use crate::command::{create_clean_shell_command, CommandExtClean};
 use crate::file_ops::detector::{BackendType, PackageManager};
 use crate::file_ops::BuildResult;
-use std::process::Command;
 
 /// Runs the build command for the project using the appropriate package manager.
 /// For Gen1 backends, runs `amplify build` for backend and `npm run build` for frontend.
@@ -44,7 +43,7 @@ pub async fn run_build(
             format!("$ {} {}\n", cmd_name, args.join(" ")),
         );
 
-        let mut command = Command::new(cmd_name).clean_env();
+        let mut command = create_clean_shell_command(cmd_name);
         command.args(args).current_dir(working_dir);
 
         crate::command::run_command_streaming(command, window, "build-output")

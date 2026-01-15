@@ -60,7 +60,7 @@ fn generate_clone_dir_name(url: &str, branch: &str) -> String {
 
 /// Execute a git command in a specific directory
 fn execute_git_command(args: &[&str], cwd: Option<&str>) -> Result<String, String> {
-    let mut cmd = crate::command::create_clean_command("git");
+    let mut cmd = crate::command::create_clean_shell_command("git");
     cmd.args(args);
 
     if let Some(dir) = cwd {
